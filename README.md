@@ -18,16 +18,16 @@ Windows 32bit版本下载 (不要下载这个，除非你真的系统是32bit)
 
 ### Lizzie用法 
 ```
-<ikatago程序路径> --platform aistudio --user <你设置的用户名> --password <你设置的密码>
+<ikatago程序路径> --platform aistudio --username <你设置的用户名> --password <你设置的密码>
 ```
 比如，Windows下可能是这样子:
 ```
-C:\xxx\ikatago.exe --platform aistudio --user kinfkong --password ******
+C:\xxx\ikatago.exe --platform aistudio --username kinfkong --password ******
 ```
 
 ### Sabaki的用法
 有三行，
 第一行: 引擎名字，随便起一个名字
 第二行: 程序路径，就是ikatago在你本机的路径，比如, C:\xxx\ikatago.exe
-第三行: 运行参数: --platform aistudio --user <你设置的用户名> --password <你设置的密码>
+第三行: 运行参数: --platform aistudio --username <你设置的用户名> --password <你设置的密码>
 
