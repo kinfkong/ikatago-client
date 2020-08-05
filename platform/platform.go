@@ -12,6 +12,7 @@ import (
 // Oss represents the oss bucket of this platform
 type Oss struct {
 	BucketEndpoint string `json:"bucketEndpoint"`
+	Bucket         string `json:"Bucket"`
 }
 
 // Platform represents the platform
@@ -22,7 +23,7 @@ type Platform struct {
 
 // GetSSHOptions gets the ssh info
 func (p *Platform) GetSSHOptions(username string) (*model.SSHOptions, error) {
-	sshJSONURL := p.Oss.BucketEndpoint + "/users/" + username + ".ssh.json"
+	sshJSONURL := "https://" + p.Oss.Bucket + "." + p.Oss.BucketEndpoint + "/users/" + username + ".ssh.json"
 	response, err := utils.DoHTTPRequest("GET", sshJSONURL, nil, nil)
 	if err != nil {
 		log.Printf("ERROR error requestting url: %s, err: %+v\n", sshJSONURL, err)

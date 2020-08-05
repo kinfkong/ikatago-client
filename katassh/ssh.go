@@ -10,7 +10,7 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-func runSSH(sshoptions model.SSHOptions, cmd string) error {
+func RunSSH(sshoptions model.SSHOptions, cmd string) error {
 	config := &ssh.ClientConfig{
 		Timeout:         30 * time.Second,
 		User:            sshoptions.User,

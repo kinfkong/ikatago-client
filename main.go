@@ -7,6 +7,7 @@ import (
 
 	"github.com/jessevdk/go-flags"
 	"github.com/kinfkong/ikatago-client/config"
+	"github.com/kinfkong/ikatago-client/katassh"
 	"github.com/kinfkong/ikatago-client/platform"
 	"github.com/kinfkong/ikatago-client/utils"
 )
@@ -31,14 +32,12 @@ func parseArgs() {
 	if opts.World != nil {
 		config.GetConfig().Set("world.url", *opts.World)
 	}
-
 	config.GetConfig().Set("user.name", opts.Username)
 	config.GetConfig().Set("user.password", opts.Password)
 	config.GetConfig().Set("platform.name", opts.Platform)
 	config.GetConfig().Set("cmd.cmd", opts.Command)
 	log.Printf("DEBUG the world is: %s\n", config.GetConfig().GetString("world.url"))
 	log.Printf("DEBUG Platform: [%s] User: [%s]\n", config.GetConfig().GetString("platform.name"), config.GetConfig().GetString("user.name"))
-
 }
 
 func getPlatformFromWorld() (*platform.Platform, error) {
@@ -74,4 +73,8 @@ func main() {
 		log.Fatal(err)
 	}
 	log.Printf("DEBUG ssh info: %+v\n", *sshOptions)
+	err = katassh.RunSSH(*sshOptions, "run-katago")
+	if err != nil {
+		log.Fatal(err)
+	}
 }
