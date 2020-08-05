@@ -9,10 +9,10 @@
 
 ## 下载ikagato客户端
 
-Windows 64bit版本下载
-Linux版本下载
-Mac OSX版本下载
-Windows 32bit版本下载 (不要下载这个，除非你真的系统是32bit)
+* [Windows 64bit版本下载](https://github.com/kinfkong/ikatago-client/releases/download/v1.0.0/ikatago-1.0.0-win64.zip) 
+* [Linux版本下载](https://github.com/kinfkong/ikatago-client/releases/download/v1.0.0/ikatago-1.0.0-linux.zip) 
+* [Mac OSX版本下载](https://github.com/kinfkong/ikatago-client/releases/download/v1.0.0/ikatago-1.0.0-mac-osx.zip) 
+* [Windows 32bit版本下载](https://github.com/kinfkong/ikatago-client/releases/download/v1.0.0/ikatago-1.0.0-win32.zip) (不要下载这个，除非你真的系统是32bit) 
 
 ## 用法 
 
