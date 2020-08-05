@@ -26,8 +26,8 @@ C:\xxx\ikatago.exe --platform aistudio --username kinfkong --password ******
 ```
 
 ### Sabaki的用法
-有三行，
-第一行: 引擎名字，随便起一个名字
-第二行: 程序路径，就是ikatago在你本机的路径，比如, C:\xxx\ikatago.exe
-第三行: 运行参数: --platform aistudio --username <你设置的用户名> --password <你设置的密码>
+有三行，  
+第一行: 引擎名字，随便起一个名字  
+第二行: 程序路径，就是ikatago在你本机的路径，比如, C:\xxx\ikatago.exe  
+第三行: 运行参数: --platform aistudio --username <你设置的用户名>   --password <你设置的密码>  
 
