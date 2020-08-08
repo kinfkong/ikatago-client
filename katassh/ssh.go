@@ -6,6 +6,8 @@ import (
 	"io"
 	"log"
 	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/kinfkong/ikatago-client/model"
@@ -49,11 +51,17 @@ func RunSSH(sshoptions model.SSHOptions, cmd string) error {
 }
 
 // RunSCP runs the scp command
-func RunSCP(sshoptions model.SSHOptions, cmd string, localFile string) error {
+func RunSCP(sshoptions model.SSHOptions, localFile string) error {
 	// check file existence
 	if !utils.FileExists(localFile) {
 		log.Printf("ERROR config file not found: %s\n", localFile)
 		return errors.New("file_not_found")
+	}
+
+	basefileName := filepath.Base(localFile)
+	if !strings.HasSuffix(basefileName, ".cfg") {
+		log.Printf("ERROR config file name must ends with .cfg")
+		return errors.New("invalid_file_extension")
 	}
 	fileSize, err := utils.GetFileSize(localFile)
 	if err != nil {
@@ -88,16 +96,28 @@ func RunSCP(sshoptions model.SSHOptions, cmd string, localFile string) error {
 	session.Stderr = os.Stderr
 	// session.Stdin = os.Stdin
 	// log.Printf("DEBUG running equal commad: ssh -p %d %s@%s %s\n", sshoptions.Port, sshoptions.User, sshoptions.Host, cmd)
-	log.Printf("DEBUG running scp command: %s %s\n", cmd, localFile)
+	log.Printf("DEBUG running scp command: %s %s\n", "scp-config", localFile)
 	writer, err := session.StdinPipe()
 	if err != nil {
 		return err
 	}
-	io.WriteString(writer, "Hello, I am testing")
-	writer.Close()
-	err = session.Run(cmd)
+	f, err := os.Open(localFile)
 	if err != nil {
+		log.Printf("ERROR cannot open file: %s\n", localFile)
 		return err
+	}
+	_, err = io.Copy(writer, f)
+	if err != nil {
+		log.Printf("ERROR failed to send file: %s\n", localFile)
+		return err
+	}
+	go func() {
+		time.Sleep(3 * time.Second)
+		writer.Close()
+	}()
+	err = session.Run(fmt.Sprintf("scp-config %s", basefileName))
+	if err != nil {
+		// return err
 	}
 	return nil
 }

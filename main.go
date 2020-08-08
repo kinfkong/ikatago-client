@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"path/filepath"
 
 	"github.com/jessevdk/go-flags"
 	"github.com/kinfkong/ikatago-client/config"
@@ -83,6 +84,7 @@ func buildRunKatagoCommand() string {
 	kataName := config.GetConfig().GetString("cmd.kataName")
 	kataWeight := config.GetConfig().GetString("cmd.kataWeight")
 	kataConfig := config.GetConfig().GetString("cmd.kataConfig")
+	kataLocalConfig := config.GetConfig().GetString("cmd.kataLocalConfig")
 	if len(kataName) > 0 {
 		cmd = cmd + fmt.Sprintf(" --name %s", kataName)
 	}
@@ -91,6 +93,9 @@ func buildRunKatagoCommand() string {
 	}
 	if len(kataConfig) > 0 {
 		cmd = cmd + fmt.Sprintf(" --config %s", kataConfig)
+	}
+	if len(kataLocalConfig) > 0 {
+		cmd = cmd + fmt.Sprintf(" --custom-config %s", filepath.Base(kataLocalConfig))
 	}
 	return cmd
 }
@@ -108,9 +113,9 @@ func main() {
 	log.Printf("DEBUG ssh info: %+v\n", *sshOptions)
 	if len(config.GetConfig().GetString("cmd.kataLocalConfig")) > 0 {
 		// copy the config file to remote
-		err = katassh.RunSCP(*sshOptions, "scp-config", config.GetConfig().GetString("cmd.kataLocalConfig"))
+		err = katassh.RunSCP(*sshOptions, config.GetConfig().GetString("cmd.kataLocalConfig"))
 		if err != nil {
-			// TODO: why? log.Fatal("Cannot copy config file to ikatago-server. ", err)
+			log.Fatal("Cannot copy config file to ikatago-server. ", err)
 		}
 	}
 	err = katassh.RunSSH(*sshOptions, buildRunKatagoCommand())
