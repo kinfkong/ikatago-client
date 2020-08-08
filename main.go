@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 
 	"github.com/jessevdk/go-flags"
@@ -13,13 +14,16 @@ import (
 )
 
 var opts struct {
-	World          *string `short:"w" long:"world" description:"The world url."`
-	Platform       string  `short:"p" long:"platform" description:"The platform, like aistudio, colab" required:"true"`
-	Username       string  `short:"u" long:"username" description:"Your username to connect" required:"true"`
-	Password       string  `long:"password" description:"Your password to connect" required:"true"`
-	ConfigFile     *string `short:"c" long:"cli-config" description:"The config file of the client (not katago config file)"`
-	KataConfigFile *string `long:"kata-config" description:"The katago config file. like, gtp_example.cfg"`
-	Command        string  `long:"cmd" description:"The command to run the katago" default:"run-katago"`
+	World           *string `short:"w" long:"world" description:"The world url."`
+	Platform        string  `short:"p" long:"platform" description:"The platform, like aistudio, colab" required:"true"`
+	Username        string  `short:"u" long:"username" description:"Your username to connect" required:"true"`
+	Password        string  `long:"password" description:"Your password to connect" required:"true"`
+	ConfigFile      *string `short:"c" long:"cli-config" description:"The config file of the client (not katago config file)"`
+	KataLocalConfig *string `long:"kata-local-config" description:"The katago config file. like, gtp_example.cfg"`
+	KataName        *string `long:"kata-name" description:"The katago binary name"`
+	KataWeight      *string `long:"kata-weight" description:"The katago weight name"`
+	KataConfig      *string `long:"kata-config" description:"The katago config name"`
+	Command         string  `long:"cmd" description:"The command to run the katago" default:"run-katago"`
 }
 
 func parseArgs() {
@@ -31,6 +35,15 @@ func parseArgs() {
 	// overrides the config with args
 	if opts.World != nil {
 		config.GetConfig().Set("world.url", *opts.World)
+	}
+	if opts.KataName != nil {
+		config.GetConfig().Set("cmd.kataName", *opts.KataName)
+	}
+	if opts.KataWeight != nil {
+		config.GetConfig().Set("cmd.kataWeight", *opts.KataWeight)
+	}
+	if opts.KataConfig != nil {
+		config.GetConfig().Set("cmd.kataConfig", *opts.KataConfig)
 	}
 	config.GetConfig().Set("user.name", opts.Username)
 	config.GetConfig().Set("user.password", opts.Password)
@@ -62,6 +75,23 @@ func getPlatformFromWorld() (*platform.Platform, error) {
 	return nil, errors.New("platform_not_found")
 }
 
+func buildRunKatagoCommand() string {
+	cmd := config.GetConfig().GetString("cmd.cmd")
+	kataName := config.GetConfig().GetString("cmd.kataName")
+	kataWeight := config.GetConfig().GetString("cmd.kataWeight")
+	kataConfig := config.GetConfig().GetString("cmd.kataConfig")
+	if len(kataName) > 0 {
+		cmd = cmd + fmt.Sprintf(" --name %s", kataName)
+	}
+	if len(kataWeight) > 0 {
+		cmd = cmd + fmt.Sprintf(" --weight %s", kataWeight)
+	}
+	if len(kataConfig) > 0 {
+		cmd = cmd + fmt.Sprintf(" --config %s", kataConfig)
+	}
+	return cmd
+}
+
 func main() {
 	parseArgs()
 	platform, err := getPlatformFromWorld()
@@ -73,7 +103,7 @@ func main() {
 		log.Fatal(err)
 	}
 	log.Printf("DEBUG ssh info: %+v\n", *sshOptions)
-	err = katassh.RunSSH(*sshOptions, "run-katago")
+	err = katassh.RunSSH(*sshOptions, buildRunKatagoCommand())
 	if err != nil {
 		log.Fatal(err)
 	}
