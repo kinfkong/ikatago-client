@@ -45,6 +45,9 @@ func parseArgs() {
 	if opts.KataConfig != nil {
 		config.GetConfig().Set("cmd.kataConfig", *opts.KataConfig)
 	}
+	if opts.KataLocalConfig != nil {
+		config.GetConfig().Set("cmd.kataLocalConfig", *opts.KataLocalConfig)
+	}
 	config.GetConfig().Set("user.name", opts.Username)
 	config.GetConfig().Set("user.password", opts.Password)
 	config.GetConfig().Set("platform.name", opts.Platform)
@@ -103,6 +106,13 @@ func main() {
 		log.Fatal(err)
 	}
 	log.Printf("DEBUG ssh info: %+v\n", *sshOptions)
+	if len(config.GetConfig().GetString("cmd.kataLocalConfig")) > 0 {
+		// copy the config file to remote
+		err = katassh.RunSCP(*sshOptions, "scp-config", config.GetConfig().GetString("cmd.kataLocalConfig"))
+		if err != nil {
+			log.Fatal("Cannot copy config file to ikatago-server. ", err)
+		}
+	}
 	err = katassh.RunSSH(*sshOptions, buildRunKatagoCommand())
 	if err != nil {
 		log.Fatal(err)
