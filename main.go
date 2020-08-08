@@ -110,7 +110,7 @@ func main() {
 		// copy the config file to remote
 		err = katassh.RunSCP(*sshOptions, "scp-config", config.GetConfig().GetString("cmd.kataLocalConfig"))
 		if err != nil {
-			log.Fatal("Cannot copy config file to ikatago-server. ", err)
+			// TODO: why? log.Fatal("Cannot copy config file to ikatago-server. ", err)
 		}
 	}
 	err = katassh.RunSSH(*sshOptions, buildRunKatagoCommand())
