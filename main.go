@@ -14,6 +14,10 @@ import (
 	"github.com/kinfkong/ikatago-client/utils"
 )
 
+const (
+	AppVersion = "1.2.0"
+)
+
 var opts struct {
 	World           *string `short:"w" long:"world" description:"The world url."`
 	Platform        string  `short:"p" long:"platform" description:"The platform, like aistudio, colab" required:"true"`
