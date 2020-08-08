@@ -101,6 +101,7 @@ func buildRunKatagoCommand() string {
 }
 
 func main() {
+	fmt.Printf("ikatago version: %s\n", AppVersion)
 	parseArgs()
 	platform, err := getPlatformFromWorld()
 	if err != nil {

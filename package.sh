@@ -1,5 +1,5 @@
 #!/bin/bash
-CLI_VERSION=1.0.0
+CLI_VERSION=1.2.0
 rm -rf ./bin && mkdir ./bin
 
 
