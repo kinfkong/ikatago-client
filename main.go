@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"path/filepath"
+	"strings"
 
 	"github.com/jessevdk/go-flags"
 	"github.com/kinfkong/ikatago-client/config"
@@ -32,7 +33,7 @@ var opts struct {
 }
 
 func parseArgs() {
-	_, err := flags.Parse(&opts)
+	subcommands, err := flags.Parse(&opts)
 	if err != nil {
 		log.Fatal("Cannot parse args", err)
 	}
@@ -57,6 +58,7 @@ func parseArgs() {
 	config.GetConfig().Set("user.password", opts.Password)
 	config.GetConfig().Set("platform.name", opts.Platform)
 	config.GetConfig().Set("cmd.cmd", opts.Command)
+	config.GetConfig().Set("cmd.subcommands", subcommands)
 	log.Printf("DEBUG the world is: %s\n", config.GetConfig().GetString("world.url"))
 	log.Printf("DEBUG Platform: [%s] User: [%s]\n", config.GetConfig().GetString("platform.name"), config.GetConfig().GetString("user.name"))
 }
@@ -100,6 +102,10 @@ func buildRunKatagoCommand() string {
 	}
 	if len(kataLocalConfig) > 0 {
 		cmd = cmd + fmt.Sprintf(" --custom-config %s", filepath.Base(kataLocalConfig))
+	}
+	subcommands := config.GetConfig().GetStringSlice("cmd.subcommands")
+	if subcommands != nil && len(subcommands) > 0 {
+		cmd = cmd + " -- " + strings.Join(subcommands, " ")
 	}
 	return cmd
 }
