@@ -95,7 +95,6 @@ func RunSCP(sshoptions model.SSHOptions, localFile string) error {
 	session.Stdout = os.Stdout
 	session.Stderr = os.Stderr
 	// session.Stdin = os.Stdin
-	// log.Printf("DEBUG running equal commad: ssh -p %d %s@%s %s\n", sshoptions.Port, sshoptions.User, sshoptions.Host, cmd)
 	log.Printf("DEBUG running scp command: %s %s\n", "scp-config", localFile)
 	writer, err := session.StdinPipe()
 	if err != nil {
