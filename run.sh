@@ -1,2 +1,3 @@
 #!/bin/bash
-go run main.go --platform aistudio --username kinfkong1 --password 12345678 --kata-weight 20b -- selfplay -output-dir /tmp -models-dir /tmp -config a
+go run main.go --platform aistudio --username kktest --password 12345678 --kata-weight 20b
+#  --kata-local-config /Users/wangjinggang/gochess/remote/katago_500v.cfg

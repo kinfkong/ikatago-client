@@ -15,6 +15,10 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
+type ikatagoHeader struct {
+	compression string `json:"compression"`
+}
+
 // RunSSH runs the ssh command
 func RunSSH(sshoptions model.SSHOptions, cmd string) error {
 	config := &ssh.ClientConfig{
@@ -37,9 +41,9 @@ func RunSSH(sshoptions model.SSHOptions, cmd string) error {
 	}
 
 	defer session.Close()
-	session.Stdout = os.Stdout
 	session.Stderr = os.Stderr
 	session.Stdin = os.Stdin
+	session.Stdout = os.Stdout
 
 	log.Printf("DEBUG running equal commad: ssh -p %d %s@%s %s\n", sshoptions.Port, sshoptions.User, sshoptions.Host, cmd)
 
@@ -117,6 +121,57 @@ func RunSCP(sshoptions model.SSHOptions, localFile string) error {
 	err = session.Run(fmt.Sprintf("scp-config %s", basefileName))
 	if err != nil {
 		// return err
+	}
+	return nil
+}
+
+// RunKatago runs the ssh as katago
+func RunKatago(sshoptions model.SSHOptions, cmd string) error {
+	config := &ssh.ClientConfig{
+		Timeout:         30 * time.Second,
+		User:            sshoptions.User,
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+	}
+
+	config.Auth = []ssh.AuthMethod{ssh.Password(sshoptions.Password)}
+	addr := fmt.Sprintf("%s:%d", sshoptions.Host, sshoptions.Port)
+	sshClient, err := ssh.Dial("tcp", addr, config)
+	if err != nil {
+		log.Fatal("failed to create ssh client", err)
+	}
+	defer sshClient.Close()
+
+	session, err := sshClient.NewSession()
+	if err != nil {
+		log.Fatal("failed to create ssh session", err)
+	}
+
+	defer session.Close()
+	session.Stderr = os.Stderr
+	session.Stdin = os.Stdin
+	// session.Stdout = os.Stdout
+	reader, err := session.StdoutPipe()
+	go func() {
+		buf := make([]byte, 4096)
+		gtpReader := NewGTPReader(reader)
+		for {
+			n, err := gtpReader.Read(buf)
+			os.Stdout.Write(buf[:n])
+			if err != nil {
+				if err == io.EOF {
+					break
+				} else {
+					log.Fatalf("failed to read from buffer, %+v\n", err)
+				}
+			}
+		}
+	}()
+
+	log.Printf("DEBUG running equal commad: ssh -p %d %s@%s %s\n", sshoptions.Port, sshoptions.User, sshoptions.Host, cmd)
+
+	err = session.Run(cmd)
+	if err != nil {
+		return err
 	}
 	return nil
 }

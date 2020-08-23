@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	AppVersion = "1.2.1"
+	AppVersion = "1.3.0"
 )
 
 var opts struct {
@@ -24,6 +24,9 @@ var opts struct {
 	Platform        string  `short:"p" long:"platform" description:"The platform, like aistudio, colab" required:"true"`
 	Username        string  `short:"u" long:"username" description:"Your username to connect" required:"true"`
 	Password        string  `long:"password" description:"Your password to connect" required:"true"`
+	NoCompress      bool    `long:"no-compress" description:"compress the data during transmission"`
+	RefreshInterval int     `long:"refresh-interval" description:"sets the refresh interval in cent seconds" default:"30"`
+	TransmitMoveNum int     `long:"transmit-move-num" description:"limits number of moves when transmission during analyze" default:"20"`
 	ConfigFile      *string `short:"c" long:"cli-config" description:"The config file of the client (not katago config file)"`
 	KataLocalConfig *string `long:"kata-local-config" description:"The katago config file. like, gtp_example.cfg"`
 	KataName        *string `long:"kata-name" description:"The katago binary name"`
@@ -35,7 +38,7 @@ var opts struct {
 func parseArgs() {
 	subcommands, err := flags.Parse(&opts)
 	if err != nil {
-		log.Fatal("Cannot parse args", err)
+		log.Fatal("Cannot parse args: ", err)
 	}
 	config.Init(opts.ConfigFile)
 	// overrides the config with args
@@ -59,6 +62,10 @@ func parseArgs() {
 	config.GetConfig().Set("platform.name", opts.Platform)
 	config.GetConfig().Set("cmd.cmd", opts.Command)
 	config.GetConfig().Set("cmd.subcommands", subcommands)
+	config.GetConfig().Set("cmd.noCompress", opts.NoCompress)
+	config.GetConfig().Set("cmd.refreshInterval", opts.RefreshInterval)
+	config.GetConfig().Set("cmd.transmitMoveNum", opts.TransmitMoveNum)
+
 	log.Printf("DEBUG the world is: %s\n", config.GetConfig().GetString("world.url"))
 	log.Printf("DEBUG Platform: [%s] User: [%s]\n", config.GetConfig().GetString("platform.name"), config.GetConfig().GetString("user.name"))
 }
@@ -103,6 +110,13 @@ func buildRunKatagoCommand() string {
 	if len(kataLocalConfig) > 0 {
 		cmd = cmd + fmt.Sprintf(" --custom-config %s", filepath.Base(kataLocalConfig))
 	}
+
+	if !config.GetConfig().GetBool("cmd.noCompress") {
+		cmd = cmd + fmt.Sprintf(" --compress")
+	}
+	cmd = cmd + fmt.Sprintf(" --refresh-interval %d", config.GetConfig().GetInt("cmd.refreshInterval"))
+	cmd = cmd + fmt.Sprintf(" --transmit-move-num %d", config.GetConfig().GetInt("cmd.transmitMoveNum"))
+
 	subcommands := config.GetConfig().GetStringSlice("cmd.subcommands")
 	if subcommands != nil && len(subcommands) > 0 {
 		cmd = cmd + " -- " + strings.Join(subcommands, " ")
@@ -129,7 +143,8 @@ func main() {
 			log.Fatal("Cannot copy config file to ikatago-server. ", err)
 		}
 	}
-	err = katassh.RunSSH(*sshOptions, buildRunKatagoCommand())
+
+	err = katassh.RunKatago(*sshOptions, buildRunKatagoCommand())
 	if err != nil {
 		log.Fatal(err)
 	}
