@@ -9,10 +9,10 @@
 
 ## 下载ikagato客户端
 
-* [Windows 64bit版本下载](https://github.com/kinfkong/ikatago-client/releases/download/1.2.1/ikatago-1.2.1-win64.zip) 
-* [Linux版本下载](https://github.com/kinfkong/ikatago-client/releases/download/1.2.1/ikatago-1.2.1-linux.zip) 
-* [Mac OSX版本下载](https://github.com/kinfkong/ikatago-client/releases/download/1.2.1/ikatago-1.2.1-mac-osx.zip) 
-* [Windows 32bit版本下载](https://github.com/kinfkong/ikatago-client/releases/download/1.2.1/ikatago-1.2.1-win32.zip) (不要下载这个，除非你真的系统是32bit) 
+* [Windows 64bit版本下载](https://github.com/kinfkong/ikatago-client/releases/download/1.3.1/ikatago-1.3.1-win64.zip) 
+* [Linux版本下载](https://github.com/kinfkong/ikatago-client/releases/download/1.3.1/ikatago-1.3.1-linux.zip) 
+* [Mac OSX版本下载](https://github.com/kinfkong/ikatago-client/releases/download/1.3.1/ikatago-1.3.1-mac-osx.zip) 
+* [Windows 32bit版本下载](https://github.com/kinfkong/ikatago-client/releases/download/1.3.1/ikatago-1.3.1-win32.zip) (不要下载这个，除非你真的系统是32bit) 
 
 ## 用法 
 
@@ -34,10 +34,10 @@ C:\xxx\ikatago.exe --platform aistudio --username kinfkong --password ******
 ### 更多参数
 
 ### 4. 如何指定katago的运行版本?
-可以通过ikatago客户端参数`--kata-name`来指定，在aistudio里，暂时支持: `katago-1.4.5`, `katago-1.5.0`及`katago-1.5.0-bigboard`
+可以通过ikatago客户端参数`--kata-name`来指定，在aistudio里，暂时支持: `katago-1.5.0`及`katago-1.6.0`
 比如:
 ```
-ikatago.exe --kata-name katago-1.4.5 --username xxxx ...
+ikatago.exe --kata-name katago-1.5.0 --username xxxx ...
 ```
 
 ### 5. 如何更改权重？
