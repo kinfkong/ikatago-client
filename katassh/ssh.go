@@ -15,10 +15,6 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-type ikatagoHeader struct {
-	compression string `json:"compression"`
-}
-
 // RunSSH runs the ssh command
 func RunSSH(sshoptions model.SSHOptions, cmd string) error {
 	config := &ssh.ClientConfig{
@@ -31,13 +27,13 @@ func RunSSH(sshoptions model.SSHOptions, cmd string) error {
 	addr := fmt.Sprintf("%s:%d", sshoptions.Host, sshoptions.Port)
 	sshClient, err := ssh.Dial("tcp", addr, config)
 	if err != nil {
-		log.Fatal("failed to create ssh client", err)
+		return err
 	}
 	defer sshClient.Close()
 
 	session, err := sshClient.NewSession()
 	if err != nil {
-		log.Fatal("failed to create ssh session", err)
+		return err
 	}
 
 	defer session.Close()
@@ -86,13 +82,13 @@ func RunSCP(sshoptions model.SSHOptions, localFile string) error {
 	addr := fmt.Sprintf("%s:%d", sshoptions.Host, sshoptions.Port)
 	sshClient, err := ssh.Dial("tcp", addr, config)
 	if err != nil {
-		log.Fatal("failed to create ssh client", err)
+		return err
 	}
 	defer sshClient.Close()
 
 	session, err := sshClient.NewSession()
 	if err != nil {
-		log.Fatal("failed to create ssh session", err)
+		return err
 	}
 
 	defer session.Close()
@@ -120,7 +116,7 @@ func RunSCP(sshoptions model.SSHOptions, localFile string) error {
 	}()
 	err = session.Run(fmt.Sprintf("scp-config %s", basefileName))
 	if err != nil {
-		// return err
+		return err
 	}
 	return nil
 }
@@ -137,13 +133,13 @@ func RunKatago(sshoptions model.SSHOptions, cmd string) error {
 	addr := fmt.Sprintf("%s:%d", sshoptions.Host, sshoptions.Port)
 	sshClient, err := ssh.Dial("tcp", addr, config)
 	if err != nil {
-		log.Fatal("failed to create ssh client", err)
+		return err
 	}
 	defer sshClient.Close()
 
 	session, err := sshClient.NewSession()
 	if err != nil {
-		log.Fatal("failed to create ssh session", err)
+		return err
 	}
 
 	defer session.Close()
@@ -161,7 +157,8 @@ func RunKatago(sshoptions model.SSHOptions, cmd string) error {
 				if err == io.EOF {
 					break
 				} else {
-					log.Fatalf("failed to read from buffer, %+v\n", err)
+					log.Printf("ERROR failed to read from buffer, %+v\n", err)
+					return
 				}
 			}
 		}

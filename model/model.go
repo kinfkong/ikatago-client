@@ -7,5 +7,4 @@ type SSHOptions struct {
 	User string `json:"user"`
 
 	Password string `json:"password"`
-	Command  string `json:"command"`
 }
