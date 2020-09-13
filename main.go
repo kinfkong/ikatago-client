@@ -61,9 +61,15 @@ func main() {
 			KataConfig:      opts.KataConfig,
 			KataWeight:      opts.KataWeight,
 			KataName:        opts.KataName,
-		}, subCommands, os.Stdout)
+		}, subCommands, os.Stdin, os.Stdout)
 		if err != nil {
 			log.Fatal("Failed to run katago.", err)
+		}
+	} else if opts.Command == "query-server" {
+		// run katago command
+		err := remoteClient.QueryServer(os.Stdout)
+		if err != nil {
+			log.Fatal("Failed to query server.", err)
 		}
 	} else {
 		log.Fatal(fmt.Sprintf("Unknown command: [%s]", opts.Command))

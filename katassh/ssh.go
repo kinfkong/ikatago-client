@@ -16,7 +16,7 @@ import (
 )
 
 // RunSSH runs the ssh command
-func RunSSH(sshoptions model.SSHOptions, cmd string) error {
+func RunSSH(sshoptions model.SSHOptions, cmd string, outputWriter io.Writer) error {
 	config := &ssh.ClientConfig{
 		Timeout:         30 * time.Second,
 		User:            sshoptions.User,
@@ -39,7 +39,7 @@ func RunSSH(sshoptions model.SSHOptions, cmd string) error {
 	defer session.Close()
 	session.Stderr = os.Stderr
 	session.Stdin = os.Stdin
-	session.Stdout = os.Stdout
+	session.Stdout = outputWriter
 
 	log.Printf("DEBUG running equal commad: ssh -p %d %s@%s %s\n", sshoptions.Port, sshoptions.User, sshoptions.Host, cmd)
 
@@ -122,7 +122,7 @@ func RunSCP(sshoptions model.SSHOptions, localFile string) error {
 }
 
 // RunKatago runs the ssh as katago
-func RunKatago(sshoptions model.SSHOptions, cmd string, outputWriter io.Writer) error {
+func RunKatago(sshoptions model.SSHOptions, cmd string, inputReader io.Reader, outputWriter io.Writer) error {
 	config := &ssh.ClientConfig{
 		Timeout:         30 * time.Second,
 		User:            sshoptions.User,
@@ -144,7 +144,7 @@ func RunKatago(sshoptions model.SSHOptions, cmd string, outputWriter io.Writer) 
 
 	defer session.Close()
 	session.Stderr = os.Stderr
-	session.Stdin = os.Stdin
+	session.Stdin = inputReader
 	reader, err := session.StdoutPipe()
 	go func() {
 		buf := make([]byte, 4096)
