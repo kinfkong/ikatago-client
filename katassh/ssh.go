@@ -122,7 +122,7 @@ func RunSCP(sshoptions model.SSHOptions, localFile string) error {
 }
 
 // RunKatago runs the ssh as katago
-func RunKatago(sshoptions model.SSHOptions, cmd string) error {
+func RunKatago(sshoptions model.SSHOptions, cmd string, outputWriter io.Writer) error {
 	config := &ssh.ClientConfig{
 		Timeout:         30 * time.Second,
 		User:            sshoptions.User,
@@ -145,14 +145,13 @@ func RunKatago(sshoptions model.SSHOptions, cmd string) error {
 	defer session.Close()
 	session.Stderr = os.Stderr
 	session.Stdin = os.Stdin
-	// session.Stdout = os.Stdout
 	reader, err := session.StdoutPipe()
 	go func() {
 		buf := make([]byte, 4096)
 		gtpReader := NewGTPReader(reader)
 		for {
 			n, err := gtpReader.Read(buf)
-			os.Stdout.Write(buf[:n])
+			outputWriter.Write(buf[:n])
 			if err != nil {
 				if err == io.EOF {
 					break

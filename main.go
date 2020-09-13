@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/jessevdk/go-flags"
 	"github.com/kinfkong/ikatago-client/client"
@@ -60,7 +61,7 @@ func main() {
 			KataConfig:      opts.KataConfig,
 			KataWeight:      opts.KataWeight,
 			KataName:        opts.KataName,
-		}, subCommands)
+		}, subCommands, os.Stdout)
 		if err != nil {
 			log.Fatal("Failed to run katago.", err)
 		}

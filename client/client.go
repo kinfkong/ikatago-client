@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"path/filepath"
 	"strings"
@@ -49,7 +50,7 @@ func NewClient(options Options) (Client, error) {
 }
 
 // RunKatago runs the katago
-func (client *Client) RunKatago(options RunKatagoOptions, subCommands []string) error {
+func (client *Client) RunKatago(options RunKatagoOptions, subCommands []string, outputWriter io.Writer) error {
 	if !client.init {
 		err := client.initClient()
 		if err != nil {
@@ -64,7 +65,7 @@ func (client *Client) RunKatago(options RunKatagoOptions, subCommands []string) 
 		}
 	}
 	// build the ssh command
-	err := katassh.RunKatago(client.sshOptions, buildRunKatagoCommand(options, subCommands))
+	err := katassh.RunKatago(client.sshOptions, buildRunKatagoCommand(options, subCommands), outputWriter)
 	if err != nil {
 		return err
 	}
