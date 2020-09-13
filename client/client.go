@@ -42,8 +42,8 @@ type Client struct {
 }
 
 // NewClient creates the client
-func NewClient(options Options) (Client, error) {
-	return Client{
+func NewClient(options Options) (*Client, error) {
+	return &Client{
 		options: options,
 		init:    false,
 	}, nil
