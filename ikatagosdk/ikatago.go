@@ -13,13 +13,17 @@ type Client struct {
 	remoteClient *client.Client
 }
 
+// DataCallbackFunc Represents the data callback function
+type DataCallbackFunc func(content []byte)
+
 // DataCallback defines the data callback
 type DataCallback interface {
 	Callback(content []byte)
+	StderrCallback(content []byte)
 }
 
 type dataNotifier struct {
-	callback DataCallback
+	callback DataCallbackFunc
 }
 
 // KatagoRunner represents katago runner
@@ -35,12 +39,13 @@ type KatagoRunner struct {
 	subCommands     []string
 	reader          io.Reader
 	writer          io.Writer
+	stderrWriter    io.Writer
 	commandWriter   io.Writer
 }
 
 func (notifier *dataNotifier) Write(p []byte) (n int, err error) {
 	if notifier.callback != nil {
-		notifier.callback.Callback(p)
+		notifier.callback(p)
 	}
 	return len(p), nil
 }
@@ -98,7 +103,10 @@ func (katagoRunner *KatagoRunner) Run(callback DataCallback) error {
 		KataConfig:      katagoRunner.kataConfig,
 	}
 	katagoRunner.writer = &dataNotifier{
-		callback: callback,
+		callback: callback.Callback,
+	}
+	katagoRunner.stderrWriter = &dataNotifier{
+		callback: callback.StderrCallback,
 	}
 	pr, pw := io.Pipe()
 	katagoRunner.commandWriter = pw
@@ -107,7 +115,7 @@ func (katagoRunner *KatagoRunner) Run(callback DataCallback) error {
 	defer pw.Close()
 	defer pr.Close()
 
-	return katagoRunner.client.remoteClient.RunKatago(options, katagoRunner.subCommands, katagoRunner.reader, katagoRunner.writer)
+	return katagoRunner.client.remoteClient.RunKatago(options, katagoRunner.subCommands, katagoRunner.reader, katagoRunner.writer, katagoRunner.stderrWriter)
 }
 
 // SetKataWeight sets the name of the kata weight
@@ -140,7 +148,7 @@ func (katagoRunner *KatagoRunner) SetRefreshInterval(refreshInterval int) {
 	katagoRunner.refreshInterval = refreshInterval
 }
 
-// SetTransmitMoveNum sets the refresh interval
+// SetTransmitMoveNum sets the transmit move num
 func (katagoRunner *KatagoRunner) SetTransmitMoveNum(transmitMoveNum int) {
 	katagoRunner.transmitMoveNum = transmitMoveNum
 }
@@ -152,4 +160,9 @@ func (katagoRunner *KatagoRunner) SendGTPCommand(command string) error {
 		return err
 	}
 	return nil
+}
+
+// Stop stops the katago engine
+func (katagoRunner *KatagoRunner) Stop() error {
+	return katagoRunner.SendGTPCommand("quit\n")
 }

@@ -50,7 +50,7 @@ func NewClient(options Options) (*Client, error) {
 }
 
 // RunKatago runs the katago
-func (client *Client) RunKatago(options RunKatagoOptions, subCommands []string, inputReader io.Reader, outputWriter io.Writer) error {
+func (client *Client) RunKatago(options RunKatagoOptions, subCommands []string, inputReader io.Reader, outputWriter io.Writer, stderrWriter io.Writer) error {
 	if !client.init {
 		err := client.initClient()
 		if err != nil {
@@ -65,7 +65,7 @@ func (client *Client) RunKatago(options RunKatagoOptions, subCommands []string, 
 		}
 	}
 	// build the ssh command
-	err := katassh.RunKatago(client.sshOptions, buildRunKatagoCommand(options, subCommands), inputReader, outputWriter)
+	err := katassh.RunKatago(client.sshOptions, buildRunKatagoCommand(options, subCommands), inputReader, outputWriter, stderrWriter)
 	if err != nil {
 		return err
 	}
