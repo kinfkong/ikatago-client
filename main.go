@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	AppVersion = "1.3.1"
+	AppVersion = "1.3.2"
 )
 
 var opts struct {
@@ -30,7 +30,8 @@ var opts struct {
 }
 
 func main() {
-	fmt.Printf("ikatago version: %s\n", AppVersion)
+	l := log.New(os.Stderr, "", 0)
+	fmt.Fprintln(os.Stderr, "ikatago version: ", AppVersion)
 	// parse args
 	subCommands, err := flags.Parse(&opts)
 	if err != nil {
@@ -40,8 +41,8 @@ func main() {
 	if opts.World == nil {
 		opts.World = &defaultWorld
 	}
-	log.Printf("DEBUG the world is: %s\n", *opts.World)
-	log.Printf("DEBUG Platform: [%s] User: [%s]\n", opts.Platform, opts.Username)
+	l.Printf("DEBUG the world is: %s\n", *opts.World)
+	l.Printf("DEBUG Platform: [%s] User: [%s]\n", opts.Platform, opts.Username)
 	remoteClient, err := client.NewClient(client.Options{
 		World:    *opts.World,
 		Platform: opts.Platform,
