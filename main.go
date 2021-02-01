@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	AppVersion = "1.3.2"
+	AppVersion = "1.3.3"
 )
 
 var opts struct {
@@ -62,6 +62,7 @@ func main() {
 			KataConfig:      opts.KataConfig,
 			KataWeight:      opts.KataWeight,
 			KataName:        opts.KataName,
+			UseRawData:      false,
 		}, subCommands, os.Stdin, os.Stdout, os.Stderr)
 		if err != nil {
 			log.Fatal("Failed to run katago.", err)

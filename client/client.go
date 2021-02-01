@@ -32,6 +32,7 @@ type RunKatagoOptions struct {
 	KataName        *string
 	KataWeight      *string
 	KataConfig      *string
+	UseRawData      bool
 }
 
 // Client represents the ikatago client
@@ -65,7 +66,7 @@ func (client *Client) RunKatago(options RunKatagoOptions, subCommands []string, 
 		}
 	}
 	// build the ssh command
-	err := katassh.RunKatago(client.sshOptions, buildRunKatagoCommand(options, subCommands), inputReader, outputWriter, stderrWriter)
+	err := katassh.RunKatago(client.sshOptions, buildRunKatagoCommand(options, subCommands), inputReader, outputWriter, stderrWriter, options.UseRawData)
 	if err != nil {
 		return err
 	}

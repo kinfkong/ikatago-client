@@ -32,6 +32,7 @@ type KatagoRunner struct {
 	noCompress      bool
 	refreshInterval int
 	transmitMoveNum int
+	useRawData      bool
 	kataLocalConfig *string
 	kataName        *string
 	kataWeight      *string
@@ -87,6 +88,7 @@ func (client *Client) CreateKatagoRunner() (*KatagoRunner, error) {
 		refreshInterval: 30,
 		transmitMoveNum: 25,
 		noCompress:      false,
+		useRawData:      false,
 		subCommands:     make([]string, 0),
 	}, nil
 }
@@ -101,6 +103,7 @@ func (katagoRunner *KatagoRunner) Run(callback DataCallback) error {
 		KataName:        katagoRunner.kataName,
 		KataWeight:      katagoRunner.kataWeight,
 		KataConfig:      katagoRunner.kataConfig,
+		UseRawData:      katagoRunner.useRawData,
 	}
 	katagoRunner.writer = &dataNotifier{
 		callback: callback.Callback,
@@ -160,6 +163,11 @@ func (katagoRunner *KatagoRunner) SendGTPCommand(command string) error {
 		return err
 	}
 	return nil
+}
+
+// SetUseRawData sets if use the raw data or not
+func (katagoRunner *KatagoRunner) SetUseRawData(useRawData bool) {
+	katagoRunner.useRawData = useRawData
 }
 
 // Stop stops the katago engine
