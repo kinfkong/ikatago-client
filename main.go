@@ -63,7 +63,7 @@ func main() {
 			KataWeight:      opts.KataWeight,
 			KataName:        opts.KataName,
 			UseRawData:      false,
-		}, subCommands, os.Stdin, os.Stdout, os.Stderr)
+		}, subCommands, os.Stdin, os.Stdout, os.Stderr, nil)
 		if err != nil {
 			log.Fatal("Failed to run katago.", err)
 		}

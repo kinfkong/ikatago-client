@@ -30,7 +30,7 @@ cd - >/dev/null
 # windows 32bit
 OUTPUT_PATH=ikatago-$CLI_VERSION-win32
 mkdir -p ./bin/$OUTPUT_PATH
-GOOS=windows GOARCH=386 go build -o ./bin/$OUTPUT_PATH/ikatago.exe
+GOOS=windows GOARCH=386 CGO_ENABLED=0 go build -o ./bin/$OUTPUT_PATH/ikatago.exe
 cd ./bin
 zip -r $OUTPUT_PATH.zip $OUTPUT_PATH
 cd - >/dev/null

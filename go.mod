@@ -6,6 +6,6 @@ require (
 	github.com/bramvdbogaerde/go-scp v0.0.0-20200518191442-5c8efdd1d925
 	github.com/jessevdk/go-flags v1.4.0
 	golang.org/x/crypto v0.0.0-20200728195943-123391ffb6de
-	golang.org/x/mobile v0.0.0-20200801112145-973feb4309de // indirect
+	golang.org/x/mobile v0.0.0-20210701032007-93619952ba7f // indirect
 	moul.io/http2curl v1.0.0
 )

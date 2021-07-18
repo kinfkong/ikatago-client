@@ -51,7 +51,7 @@ func NewClient(options Options) (*Client, error) {
 }
 
 // RunKatago runs the katago
-func (client *Client) RunKatago(options RunKatagoOptions, subCommands []string, inputReader io.Reader, outputWriter io.Writer, stderrWriter io.Writer) error {
+func (client *Client) RunKatago(options RunKatagoOptions, subCommands []string, inputReader io.Reader, outputWriter io.Writer, stderrWriter io.Writer, onReady func()) error {
 	if !client.init {
 		err := client.initClient()
 		if err != nil {
@@ -66,7 +66,7 @@ func (client *Client) RunKatago(options RunKatagoOptions, subCommands []string, 
 		}
 	}
 	// build the ssh command
-	err := katassh.RunKatago(client.sshOptions, buildRunKatagoCommand(options, subCommands), inputReader, outputWriter, stderrWriter, options.UseRawData)
+	err := katassh.RunKatago(client.sshOptions, buildRunKatagoCommand(options, subCommands), inputReader, outputWriter, stderrWriter, options.UseRawData, onReady)
 	if err != nil {
 		return err
 	}
@@ -159,7 +159,12 @@ func (client *Client) getPlatformFromWorld() (*platform.Platform, error) {
 
 // getSSHOptions gets the ssh info
 func (client *Client) getSSHOptions(p *platform.Platform) (*model.SSHOptions, error) {
-	sshJSONURL := "https://" + p.Oss.Bucket + "." + p.Oss.BucketEndpoint + "/users/" + client.options.Username + ".ssh.json"
+	sshJSONURL := ""
+	if p.Http != nil && p.Http.GetUrl != nil {
+		sshJSONURL = *p.Http.GetUrl + "/users/" + client.options.Username + ".ssh.json"
+	} else {
+		sshJSONURL = "https://" + p.Oss.Bucket + "." + p.Oss.BucketEndpoint + "/users/" + client.options.Username + ".ssh.json"
+	}
 	response, err := utils.DoHTTPRequest("GET", sshJSONURL, nil, nil)
 	if err != nil {
 		log.Printf("ERROR error requestting url: %s, err: %+v\n", sshJSONURL, err)

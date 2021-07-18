@@ -2,6 +2,7 @@ package utils
 
 import (
 	"bytes"
+	"crypto/tls"
 	"errors"
 	"io/ioutil"
 	"log"
@@ -13,7 +14,10 @@ import (
 
 // DoHTTPRequest Sends generic http request
 func DoHTTPRequest(method string, url string, headers map[string]string, body []byte) (responseBody string, err error) {
-	httpClient := &http.Client{}
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	httpClient := &http.Client{Transport: tr}
 	req, _ := http.NewRequest(method, url, bytes.NewBuffer(body))
 	req.Close = true
 	if headers != nil {

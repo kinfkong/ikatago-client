@@ -122,7 +122,7 @@ func RunSCP(sshoptions model.SSHOptions, localFile string) error {
 }
 
 // RunKatago runs the ssh as katago
-func RunKatago(sshoptions model.SSHOptions, cmd string, inputReader io.Reader, outputWriter io.Writer, stderrWriter io.Writer, useRawData bool) error {
+func RunKatago(sshoptions model.SSHOptions, cmd string, inputReader io.Reader, outputWriter io.Writer, stderrWriter io.Writer, useRawData bool, onReady func()) error {
 	config := &ssh.ClientConfig{
 		Timeout:         30 * time.Second,
 		User:            sshoptions.User,
@@ -178,7 +178,9 @@ func RunKatago(sshoptions model.SSHOptions, cmd string, inputReader io.Reader, o
 	}()
 
 	log.Printf("DEBUG running equal commad: ssh -p %d %s@%s %s\n", sshoptions.Port, sshoptions.User, sshoptions.Host, cmd)
-
+	if onReady != nil {
+		onReady()
+	}
 	err = session.Run(cmd)
 	if err != nil {
 		return err

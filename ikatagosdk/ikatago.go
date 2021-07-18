@@ -20,6 +20,7 @@ type DataCallbackFunc func(content []byte)
 type DataCallback interface {
 	Callback(content []byte)
 	StderrCallback(content []byte)
+	OnReady()
 }
 
 type dataNotifier struct {
@@ -118,7 +119,7 @@ func (katagoRunner *KatagoRunner) Run(callback DataCallback) error {
 	defer pw.Close()
 	defer pr.Close()
 
-	return katagoRunner.client.remoteClient.RunKatago(options, katagoRunner.subCommands, katagoRunner.reader, katagoRunner.writer, katagoRunner.stderrWriter)
+	return katagoRunner.client.remoteClient.RunKatago(options, katagoRunner.subCommands, katagoRunner.reader, katagoRunner.writer, katagoRunner.stderrWriter, callback.OnReady)
 }
 
 // SetKataWeight sets the name of the kata weight
