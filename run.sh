@@ -1,2 +1,2 @@
 #!/bin/bash
-go run main.go --platform all --username mj-localtest1 --password 12345678
+go run main.go  --platform all --username mj-go1 --password 12345678 

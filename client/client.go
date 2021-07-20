@@ -33,6 +33,7 @@ type RunKatagoOptions struct {
 	KataWeight      *string
 	KataConfig      *string
 	UseRawData      bool
+	ForceNode       *string
 }
 
 // Client represents the ikatago client
@@ -114,8 +115,10 @@ func buildRunKatagoCommand(options RunKatagoOptions, subCommands []string) strin
 	}
 	cmd = cmd + fmt.Sprintf(" --refresh-interval %d", options.RefreshInterval)
 	cmd = cmd + fmt.Sprintf(" --transmit-move-num %d", options.TransmitMoveNum)
-
-	if subCommands != nil && len(subCommands) > 0 {
+	if options.ForceNode != nil && len(*options.ForceNode) > 0 {
+		cmd = cmd + fmt.Sprintf(" --force-node %s", *options.ForceNode)
+	}
+	if len(subCommands) > 0 {
 		cmd = cmd + " -- " + strings.Join(subCommands, " ")
 	}
 	return cmd

@@ -24,6 +24,7 @@ var opts struct {
 	TransmitMoveNum int     `long:"transmit-move-num" description:"limits number of moves when transmission during analyze" default:"20"`
 	KataLocalConfig *string `long:"kata-local-config" description:"The katago config file. like, gtp_example.cfg"`
 	KataName        *string `long:"kata-name" description:"The katago binary name"`
+	ForceNode       *string `long:"force-node" description:"in cluster, force to a specific node."`
 	KataWeight      *string `long:"kata-weight" description:"The katago weight name"`
 	KataConfig      *string `long:"kata-config" description:"The katago config name"`
 	Command         string  `long:"cmd" description:"The command to run the katago" default:"run-katago"`
@@ -63,6 +64,7 @@ func main() {
 			KataWeight:      opts.KataWeight,
 			KataName:        opts.KataName,
 			UseRawData:      false,
+			ForceNode:       opts.ForceNode,
 		}, subCommands, os.Stdin, os.Stdout, os.Stderr, nil)
 		if err != nil {
 			log.Fatal("Failed to run katago.", err)
