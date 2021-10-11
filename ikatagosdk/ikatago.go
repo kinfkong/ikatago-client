@@ -3,6 +3,7 @@ package ikatagosdk
 import (
 	"bytes"
 	"io"
+	"strings"
 
 	"github.com/kinfkong/ikatago-client/client"
 	"github.com/kinfkong/ikatago-client/utils"
@@ -178,9 +179,9 @@ func (katagoRunner *KatagoRunner) SetUseRawData(useRawData bool) {
 	katagoRunner.useRawData = useRawData
 }
 
-// SetSubCommands sets the subcommands. for example: ['analysis', '-analysis-threads', '12']
-func (katagoRunner *KatagoRunner) SetSubCommands(subCommands []string) {
-	katagoRunner.subCommands = subCommands
+// SetSubCommands sets the subcommands. for example: 'analysis -analysis-threads 12'
+func (katagoRunner *KatagoRunner) SetSubCommands(subCommands string) {
+	katagoRunner.subCommands = strings.Split(subCommands, " ")
 }
 
 // Stop stops the katago engine
