@@ -25,15 +25,16 @@ type Options struct {
 
 // RunKatagoOptions represents the run katago options
 type RunKatagoOptions struct {
-	NoCompress      bool
-	RefreshInterval int
-	TransmitMoveNum int
-	KataLocalConfig *string
-	KataName        *string
-	KataWeight      *string
-	KataConfig      *string
-	UseRawData      bool
-	ForceNode       *string
+	NoCompress         bool
+	RefreshInterval    int
+	TransmitMoveNum    int
+	KataLocalConfig    *string
+	KataName           *string
+	KataWeight         *string
+	KataConfig         *string
+	KataOverrideConfig *string
+	UseRawData         bool
+	ForceNode          *string
 }
 
 // Client represents the ikatago client
@@ -97,6 +98,7 @@ func buildRunKatagoCommand(options RunKatagoOptions, subCommands []string) strin
 	kataWeight := options.KataWeight
 	kataConfig := options.KataConfig
 	kataLocalConfig := options.KataLocalConfig
+	kataOverrideConfig := options.KataOverrideConfig
 	if kataName != nil && len(*kataName) > 0 {
 		cmd = cmd + fmt.Sprintf(" --name %s", *kataName)
 	}
@@ -120,6 +122,11 @@ func buildRunKatagoCommand(options RunKatagoOptions, subCommands []string) strin
 	}
 	if len(subCommands) > 0 {
 		cmd = cmd + " -- " + strings.Join(subCommands, " ")
+		if kataOverrideConfig != nil && len(*kataOverrideConfig) > 0 {
+			cmd = cmd + " -override-config " + *kataOverrideConfig
+		}
+	} else if kataOverrideConfig != nil && len(*kataOverrideConfig) > 0 {
+		cmd = cmd + " -- gtp -override-config " + *kataOverrideConfig
 	}
 	return cmd
 }

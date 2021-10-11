@@ -15,19 +15,21 @@ const (
 )
 
 var opts struct {
-	World           *string `short:"w" long:"world" description:"The world url."`
-	Platform        string  `short:"p" long:"platform" description:"The platform, like aistudio, colab" required:"true"`
-	Username        string  `short:"u" long:"username" description:"Your username to connect" required:"true"`
-	Password        string  `long:"password" description:"Your password to connect" required:"true"`
-	NoCompress      bool    `long:"no-compress" description:"compress the data during transmission"`
-	RefreshInterval int     `long:"refresh-interval" description:"sets the refresh interval in cent seconds" default:"30"`
-	TransmitMoveNum int     `long:"transmit-move-num" description:"limits number of moves when transmission during analyze" default:"20"`
-	KataLocalConfig *string `long:"kata-local-config" description:"The katago config file. like, gtp_example.cfg"`
-	KataName        *string `long:"kata-name" description:"The katago binary name"`
-	ForceNode       *string `long:"force-node" description:"in cluster, force to a specific node."`
-	KataWeight      *string `long:"kata-weight" description:"The katago weight name"`
-	KataConfig      *string `long:"kata-config" description:"The katago config name"`
-	Command         string  `long:"cmd" description:"The command to run the katago" default:"run-katago"`
+	World              *string `short:"w" long:"world" description:"The world url."`
+	Platform           string  `short:"p" long:"platform" description:"The platform, like aistudio, colab" required:"true"`
+	Username           string  `short:"u" long:"username" description:"Your username to connect" required:"true"`
+	Password           string  `long:"password" description:"Your password to connect" required:"true"`
+	NoCompress         bool    `long:"no-compress" description:"compress the data during transmission"`
+	RefreshInterval    int     `long:"refresh-interval" description:"sets the refresh interval in cent seconds" default:"30"`
+	TransmitMoveNum    int     `long:"transmit-move-num" description:"limits number of moves when transmission during analyze" default:"20"`
+	KataLocalConfig    *string `long:"kata-local-config" description:"The katago config file. like, gtp_example.cfg"`
+	KataOverrideConfig *string `long:"kata-override-config" description:"The katago override-config, like: analysisPVLen=30,numSearchThreads=30"`
+
+	KataName   *string `long:"kata-name" description:"The katago binary name"`
+	ForceNode  *string `long:"force-node" description:"in cluster, force to a specific node."`
+	KataWeight *string `long:"kata-weight" description:"The katago weight name"`
+	KataConfig *string `long:"kata-config" description:"The katago config name"`
+	Command    string  `long:"cmd" description:"The command to run the katago" default:"run-katago"`
 }
 
 func main() {
@@ -56,15 +58,16 @@ func main() {
 	if opts.Command == "run-katago" {
 		// run katago command
 		err := remoteClient.RunKatago(client.RunKatagoOptions{
-			NoCompress:      opts.NoCompress,
-			RefreshInterval: opts.RefreshInterval,
-			TransmitMoveNum: opts.TransmitMoveNum,
-			KataLocalConfig: opts.KataLocalConfig,
-			KataConfig:      opts.KataConfig,
-			KataWeight:      opts.KataWeight,
-			KataName:        opts.KataName,
-			UseRawData:      false,
-			ForceNode:       opts.ForceNode,
+			NoCompress:         opts.NoCompress,
+			RefreshInterval:    opts.RefreshInterval,
+			TransmitMoveNum:    opts.TransmitMoveNum,
+			KataLocalConfig:    opts.KataLocalConfig,
+			KataOverrideConfig: opts.KataOverrideConfig,
+			KataConfig:         opts.KataConfig,
+			KataWeight:         opts.KataWeight,
+			KataName:           opts.KataName,
+			UseRawData:         false,
+			ForceNode:          opts.ForceNode,
 		}, subCommands, os.Stdin, os.Stdout, os.Stderr, nil)
 		if err != nil {
 			log.Fatal("Failed to run katago.", err)

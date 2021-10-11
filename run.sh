@@ -1,2 +1,3 @@
 #!/bin/bash
-go run main.go  --platform all --username mj-go1 --password 12345678 
+go run main.go  --platform all --username zz-go1 --password 834173 --kata-override-config analysisPVLen=30,numSearchThreads=30
+#go run main.go  --platform all --username zz-go1 --password 834173 --kata-override-config analysisPVLen=30,numSearchThreads=30

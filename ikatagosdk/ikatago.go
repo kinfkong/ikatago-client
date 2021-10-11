@@ -29,20 +29,21 @@ type dataNotifier struct {
 
 // KatagoRunner represents katago runner
 type KatagoRunner struct {
-	client          *Client
-	noCompress      bool
-	refreshInterval int
-	transmitMoveNum int
-	useRawData      bool
-	kataLocalConfig *string
-	kataName        *string
-	kataWeight      *string
-	kataConfig      *string
-	subCommands     []string
-	reader          io.Reader
-	writer          io.Writer
-	stderrWriter    io.Writer
-	commandWriter   io.Writer
+	client             *Client
+	noCompress         bool
+	refreshInterval    int
+	transmitMoveNum    int
+	useRawData         bool
+	kataLocalConfig    *string
+	kataOverrideConfig *string
+	kataName           *string
+	kataWeight         *string
+	kataConfig         *string
+	subCommands        []string
+	reader             io.Reader
+	writer             io.Writer
+	stderrWriter       io.Writer
+	commandWriter      io.Writer
 }
 
 func (notifier *dataNotifier) Write(p []byte) (n int, err error) {
@@ -97,14 +98,15 @@ func (client *Client) CreateKatagoRunner() (*KatagoRunner, error) {
 // Run runs the katago
 func (katagoRunner *KatagoRunner) Run(callback DataCallback) error {
 	options := client.RunKatagoOptions{
-		NoCompress:      katagoRunner.noCompress,
-		RefreshInterval: katagoRunner.refreshInterval,
-		TransmitMoveNum: katagoRunner.transmitMoveNum,
-		KataLocalConfig: katagoRunner.kataLocalConfig,
-		KataName:        katagoRunner.kataName,
-		KataWeight:      katagoRunner.kataWeight,
-		KataConfig:      katagoRunner.kataConfig,
-		UseRawData:      katagoRunner.useRawData,
+		NoCompress:         katagoRunner.noCompress,
+		RefreshInterval:    katagoRunner.refreshInterval,
+		TransmitMoveNum:    katagoRunner.transmitMoveNum,
+		KataLocalConfig:    katagoRunner.kataLocalConfig,
+		KataOverrideConfig: katagoRunner.kataOverrideConfig,
+		KataName:           katagoRunner.kataName,
+		KataWeight:         katagoRunner.kataWeight,
+		KataConfig:         katagoRunner.kataConfig,
+		UseRawData:         katagoRunner.useRawData,
 	}
 	katagoRunner.writer = &dataNotifier{
 		callback: callback.Callback,
@@ -135,6 +137,11 @@ func (katagoRunner *KatagoRunner) SetKataConfig(kataConfig string) {
 // SetKataLocalConfig sets the name of the kata local config file
 func (katagoRunner *KatagoRunner) SetKataLocalConfig(kataLocalConfig string) {
 	katagoRunner.kataLocalConfig = &kataLocalConfig
+}
+
+// SetKataOverrideConfig sets the name of the kata override-config option of kata
+func (katagoRunner *KatagoRunner) SetKataOverrideConfig(kataOverrideConfig string) {
+	katagoRunner.kataOverrideConfig = &kataOverrideConfig
 }
 
 // SetKataName sets the name of the katago name
@@ -169,6 +176,10 @@ func (katagoRunner *KatagoRunner) SendGTPCommand(command string) error {
 // SetUseRawData sets if use the raw data or not
 func (katagoRunner *KatagoRunner) SetUseRawData(useRawData bool) {
 	katagoRunner.useRawData = useRawData
+}
+
+func (katagoRunner *KatagoRunner) SetSubCommands(subCommands []string) {
+	katagoRunner.subCommands = subCommands
 }
 
 // Stop stops the katago engine
