@@ -139,7 +139,7 @@ func (katagoRunner *KatagoRunner) SetKataLocalConfig(kataLocalConfig string) {
 	katagoRunner.kataLocalConfig = &kataLocalConfig
 }
 
-// SetKataOverrideConfig sets the name of the kata override-config option of kata
+// SetKataOverrideConfig sets the name of the kata override-config option of kata, example: analysisPVLen=30,playoutDoublingAdvantage=3
 func (katagoRunner *KatagoRunner) SetKataOverrideConfig(kataOverrideConfig string) {
 	katagoRunner.kataOverrideConfig = &kataOverrideConfig
 }
@@ -178,6 +178,7 @@ func (katagoRunner *KatagoRunner) SetUseRawData(useRawData bool) {
 	katagoRunner.useRawData = useRawData
 }
 
+// SetSubCommands sets the subcommands. for example: ['analysis', '-analysis-threads', '12']
 func (katagoRunner *KatagoRunner) SetSubCommands(subCommands []string) {
 	katagoRunner.subCommands = subCommands
 }
