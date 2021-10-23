@@ -186,5 +186,6 @@ func (katagoRunner *KatagoRunner) SetSubCommands(subCommands string) {
 
 // Stop stops the katago engine
 func (katagoRunner *KatagoRunner) Stop() error {
-	return katagoRunner.SendGTPCommand("quit\n")
+	katagoRunner.client.remoteClient.StopCurrentSession()
+	return nil
 }

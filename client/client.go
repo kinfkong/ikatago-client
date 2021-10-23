@@ -39,9 +39,10 @@ type RunKatagoOptions struct {
 
 // Client represents the ikatago client
 type Client struct {
-	init       bool
-	options    Options
-	sshOptions model.SSHOptions
+	init           bool
+	options        Options
+	sshOptions     model.SSHOptions
+	currentSession *katassh.KataSSHSession
 }
 
 // NewClient creates the client
@@ -51,9 +52,31 @@ func NewClient(options Options) (*Client, error) {
 		init:    false,
 	}, nil
 }
+func (client *Client) newKataSSHSession() *katassh.KataSSHSession {
+	session := katassh.KataSSHSession{}
+	if client.currentSession != nil {
+		client.currentSession.Stop()
+		client.currentSession = nil
+	}
+	client.currentSession = &session
+	return client.currentSession
+}
+func (client *Client) runScp(options RunKatagoOptions) error {
+	s := client.newKataSSHSession()
+	defer s.Stop()
+	// run scp to copy the configure
+	err := s.RunSCP(client.sshOptions, *options.KataLocalConfig)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
 // RunKatago runs the katago
 func (client *Client) RunKatago(options RunKatagoOptions, subCommands []string, inputReader io.Reader, outputWriter io.Writer, stderrWriter io.Writer, onReady func()) error {
+	s := client.newKataSSHSession()
+	defer s.Stop()
+
 	if !client.init {
 		err := client.initClient()
 		if err != nil {
@@ -61,22 +84,30 @@ func (client *Client) RunKatago(options RunKatagoOptions, subCommands []string, 
 		}
 	}
 	if options.KataLocalConfig != nil {
-		// run scp to copy the configure
-		err := katassh.RunSCP(client.sshOptions, *options.KataLocalConfig)
+		err := client.runScp(options)
 		if err != nil {
 			return err
 		}
 	}
+
 	// build the ssh command
-	err := katassh.RunKatago(client.sshOptions, buildRunKatagoCommand(options, subCommands), inputReader, outputWriter, stderrWriter, options.UseRawData, onReady)
+	err := s.RunKatago(client.sshOptions, buildRunKatagoCommand(options, subCommands), inputReader, outputWriter, stderrWriter, options.UseRawData, onReady)
 	if err != nil {
 		return err
 	}
 	return nil
 }
+func (client *Client) StopCurrentSession() {
+	if client.currentSession != nil {
+		client.currentSession.Stop()
+	}
+}
 
 // QueryServer queries the server
 func (client *Client) QueryServer(outputWriter io.Writer) error {
+	s := client.newKataSSHSession()
+	defer s.Stop()
+
 	if !client.init {
 		err := client.initClient()
 		if err != nil {
@@ -85,7 +116,7 @@ func (client *Client) QueryServer(outputWriter io.Writer) error {
 	}
 
 	// build the ssh command
-	err := katassh.RunSSH(client.sshOptions, "query-server", outputWriter)
+	err := s.RunSSH(client.sshOptions, "query-server", outputWriter)
 	if err != nil {
 		return err
 	}
@@ -113,7 +144,7 @@ func buildRunKatagoCommand(options RunKatagoOptions, subCommands []string) strin
 	}
 
 	if !options.NoCompress {
-		cmd = cmd + fmt.Sprintf(" --compress")
+		cmd = cmd + " --compress"
 	}
 	cmd = cmd + fmt.Sprintf(" --refresh-interval %d", options.RefreshInterval)
 	cmd = cmd + fmt.Sprintf(" --transmit-move-num %d", options.TransmitMoveNum)

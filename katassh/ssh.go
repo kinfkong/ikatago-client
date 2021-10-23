@@ -15,8 +15,13 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
+type KataSSHSession struct {
+	Stopped bool
+	Session *ssh.Session
+}
+
 // RunSSH runs the ssh command
-func RunSSH(sshoptions model.SSHOptions, cmd string, outputWriter io.Writer) error {
+func (kataSSHSession *KataSSHSession) RunSSH(sshoptions model.SSHOptions, cmd string, outputWriter io.Writer) error {
 	config := &ssh.ClientConfig{
 		Timeout:         30 * time.Second,
 		User:            sshoptions.User,
@@ -35,7 +40,11 @@ func RunSSH(sshoptions model.SSHOptions, cmd string, outputWriter io.Writer) err
 	if err != nil {
 		return err
 	}
-
+	defer session.Close()
+	if kataSSHSession.Stopped {
+		return nil
+	}
+	kataSSHSession.Session = session
 	defer session.Close()
 	session.Stderr = os.Stderr
 	session.Stdin = os.Stdin
@@ -51,7 +60,7 @@ func RunSSH(sshoptions model.SSHOptions, cmd string, outputWriter io.Writer) err
 }
 
 // RunSCP runs the scp command
-func RunSCP(sshoptions model.SSHOptions, localFile string) error {
+func (kataSSHSession *KataSSHSession) RunSCP(sshoptions model.SSHOptions, localFile string) error {
 	// check file existence
 	if !utils.FileExists(localFile) {
 		log.Printf("ERROR config file not found: %s\n", localFile)
@@ -90,7 +99,11 @@ func RunSCP(sshoptions model.SSHOptions, localFile string) error {
 	if err != nil {
 		return err
 	}
-
+	defer session.Close()
+	if kataSSHSession.Stopped {
+		return nil
+	}
+	kataSSHSession.Session = session
 	defer session.Close()
 	session.Stdout = os.Stdout
 	session.Stderr = os.Stderr
@@ -122,7 +135,7 @@ func RunSCP(sshoptions model.SSHOptions, localFile string) error {
 }
 
 // RunKatago runs the ssh as katago
-func RunKatago(sshoptions model.SSHOptions, cmd string, inputReader io.Reader, outputWriter io.Writer, stderrWriter io.Writer, useRawData bool, onReady func()) error {
+func (kataSSHSession *KataSSHSession) RunKatago(sshoptions model.SSHOptions, cmd string, inputReader io.Reader, outputWriter io.Writer, stderrWriter io.Writer, useRawData bool, onReady func()) error {
 	config := &ssh.ClientConfig{
 		Timeout:         30 * time.Second,
 		User:            sshoptions.User,
@@ -141,11 +154,18 @@ func RunKatago(sshoptions model.SSHOptions, cmd string, inputReader io.Reader, o
 	if err != nil {
 		return err
 	}
-
 	defer session.Close()
+	if kataSSHSession.Stopped {
+		return nil
+	}
+	kataSSHSession.Session = session
+
 	session.Stderr = stderrWriter
 	session.Stdin = inputReader
 	reader, err := session.StdoutPipe()
+	if err != nil {
+		return err
+	}
 	go func() {
 		buf := make([]byte, 4096)
 		var theReader io.Reader = nil
@@ -186,4 +206,12 @@ func RunKatago(sshoptions model.SSHOptions, cmd string, inputReader io.Reader, o
 		return err
 	}
 	return nil
+}
+
+func (kataSSHSession *KataSSHSession) Stop() {
+	kataSSHSession.Stopped = true
+	if kataSSHSession.Session != nil {
+		kataSSHSession.Session.Close()
+		kataSSHSession.Session = nil
+	}
 }

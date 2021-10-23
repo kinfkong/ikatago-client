@@ -72,6 +72,7 @@ func main() {
 		if err != nil {
 			log.Fatal("Failed to run katago.", err)
 		}
+
 	} else if opts.Command == "query-server" {
 		// run katago command
 		err := remoteClient.QueryServer(os.Stdout)
