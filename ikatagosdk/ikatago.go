@@ -45,6 +45,7 @@ type KatagoRunner struct {
 	writer             io.Writer
 	stderrWriter       io.Writer
 	commandWriter      io.Writer
+	sessionResult      *client.SessionResult
 }
 
 func (notifier *dataNotifier) Write(p []byte) (n int, err error) {
@@ -122,7 +123,13 @@ func (katagoRunner *KatagoRunner) Run(callback DataCallback) error {
 	defer pw.Close()
 	defer pr.Close()
 
-	return katagoRunner.client.remoteClient.RunKatago(options, katagoRunner.subCommands, katagoRunner.reader, katagoRunner.writer, katagoRunner.stderrWriter, callback.OnReady)
+	sessionResult, err := katagoRunner.client.remoteClient.RunKatago(options, katagoRunner.subCommands, katagoRunner.reader, katagoRunner.writer, katagoRunner.stderrWriter, callback.OnReady)
+	if err != nil {
+		return err
+	}
+	katagoRunner.sessionResult = sessionResult
+	sessionResult.Wait()
+	return nil
 }
 
 // SetKataWeight sets the name of the kata weight
@@ -186,6 +193,9 @@ func (katagoRunner *KatagoRunner) SetSubCommands(subCommands string) {
 
 // Stop stops the katago engine
 func (katagoRunner *KatagoRunner) Stop() error {
-	katagoRunner.client.remoteClient.StopCurrentSession()
+	if katagoRunner.sessionResult != nil {
+		katagoRunner.sessionResult.Stop()
+		katagoRunner.sessionResult = nil
+	}
 	return nil
 }

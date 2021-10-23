@@ -57,7 +57,7 @@ func main() {
 	}
 	if opts.Command == "run-katago" {
 		// run katago command
-		err := remoteClient.RunKatago(client.RunKatagoOptions{
+		sessionResult, err := remoteClient.RunKatago(client.RunKatagoOptions{
 			NoCompress:         opts.NoCompress,
 			RefreshInterval:    opts.RefreshInterval,
 			TransmitMoveNum:    opts.TransmitMoveNum,
@@ -72,7 +72,7 @@ func main() {
 		if err != nil {
 			log.Fatal("Failed to run katago.", err)
 		}
-
+		sessionResult.Wait()
 	} else if opts.Command == "query-server" {
 		// run katago command
 		err := remoteClient.QueryServer(os.Stdout)
