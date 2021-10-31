@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io"
 	"strings"
+	"time"
 
 	"github.com/kinfkong/ikatago-client/client"
 	"github.com/kinfkong/ikatago-client/utils"
@@ -36,6 +37,7 @@ type KatagoRunner struct {
 	transmitMoveNum    int
 	useRawData         bool
 	kataLocalConfig    *string
+	engineType         *string
 	kataOverrideConfig *string
 	kataName           *string
 	kataWeight         *string
@@ -46,6 +48,7 @@ type KatagoRunner struct {
 	stderrWriter       io.Writer
 	commandWriter      io.Writer
 	sessionResult      *client.SessionResult
+	started            bool
 }
 
 func (notifier *dataNotifier) Write(p []byte) (n int, err error) {
@@ -76,9 +79,9 @@ func NewClient(world string, platform string, username string, password string) 
 }
 
 // QueryServer queries the server info
-func (client *Client) QueryServer() (string, error) {
+func (client *Client) QueryServer(engineType *string) (string, error) {
 	buf := bytes.NewBuffer(nil)
-	err := client.remoteClient.QueryServer(buf)
+	err := client.remoteClient.QueryServer(buf, engineType)
 	if err != nil {
 		return "", err
 	}
@@ -94,14 +97,17 @@ func (client *Client) CreateKatagoRunner() (*KatagoRunner, error) {
 		noCompress:      false,
 		useRawData:      false,
 		subCommands:     make([]string, 0),
+		started:         false,
 	}, nil
 }
 
 // Run runs the katago
 func (katagoRunner *KatagoRunner) Run(callback DataCallback) error {
+	katagoRunner.started = true
 	options := client.RunKatagoOptions{
 		NoCompress:         katagoRunner.noCompress,
 		RefreshInterval:    katagoRunner.refreshInterval,
+		EngineType:         katagoRunner.engineType,
 		TransmitMoveNum:    katagoRunner.transmitMoveNum,
 		KataLocalConfig:    katagoRunner.kataLocalConfig,
 		KataOverrideConfig: katagoRunner.kataOverrideConfig,
@@ -125,10 +131,12 @@ func (katagoRunner *KatagoRunner) Run(callback DataCallback) error {
 
 	sessionResult, err := katagoRunner.client.remoteClient.RunKatago(options, katagoRunner.subCommands, katagoRunner.reader, katagoRunner.writer, katagoRunner.stderrWriter, callback.OnReady)
 	if err != nil {
+		katagoRunner.started = false
 		return err
 	}
 	katagoRunner.sessionResult = sessionResult
 	sessionResult.Wait()
+	katagoRunner.started = false
 	return nil
 }
 
@@ -191,11 +199,26 @@ func (katagoRunner *KatagoRunner) SetSubCommands(subCommands string) {
 	katagoRunner.subCommands = strings.Split(subCommands, " ")
 }
 
+// SetEngineType sets the engineType. for example: 'katago', 'gomoku'
+func (katagoRunner *KatagoRunner) SetEngineType(engineType string) {
+	katagoRunner.engineType = &engineType
+}
+
 // Stop stops the katago engine
 func (katagoRunner *KatagoRunner) Stop() error {
+	c := 0
+	for katagoRunner.started && katagoRunner.sessionResult == nil {
+		time.Sleep(100 * time.Millisecond)
+		c++
+		if c >= 200 {
+			// 20 seconds
+			break
+		}
+	}
 	if katagoRunner.sessionResult != nil {
 		katagoRunner.sessionResult.Stop()
 		katagoRunner.sessionResult = nil
+		katagoRunner.started = false
 	}
 	return nil
 }

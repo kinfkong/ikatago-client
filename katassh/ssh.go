@@ -60,7 +60,7 @@ func (kataSSHSession *KataSSHSession) RunSSH(sshoptions model.SSHOptions, cmd st
 }
 
 // RunSCP runs the scp command
-func (kataSSHSession *KataSSHSession) RunSCP(sshoptions model.SSHOptions, localFile string) error {
+func (kataSSHSession *KataSSHSession) RunSCP(sshoptions model.SSHOptions, localFile string, engineType *string) error {
 	// check file existence
 	if !utils.FileExists(localFile) {
 		log.Printf("ERROR config file not found: %s\n", localFile)
@@ -127,7 +127,12 @@ func (kataSSHSession *KataSSHSession) RunSCP(sshoptions model.SSHOptions, localF
 		time.Sleep(3 * time.Second)
 		writer.Close()
 	}()
-	err = session.Run(fmt.Sprintf("scp-config %s", basefileName))
+	if engineType != nil && len(*engineType) > 0 {
+		err = session.Run(fmt.Sprintf("scp-config %s --engine-type %s", basefileName, *engineType))
+	} else {
+		err = session.Run(fmt.Sprintf("scp-config %s", basefileName))
+	}
+
 	if err != nil {
 		return err
 	}

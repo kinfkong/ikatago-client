@@ -30,6 +30,7 @@ type RunKatagoOptions struct {
 	RefreshInterval    int
 	TransmitMoveNum    int
 	KataLocalConfig    *string
+	EngineType         *string
 	KataName           *string
 	KataWeight         *string
 	KataConfig         *string
@@ -79,7 +80,7 @@ func (client *Client) RunKatago(options RunKatagoOptions, subCommands []string, 
 	}
 	if options.KataLocalConfig != nil {
 		// run scp to copy the configure
-		err := (&katassh.KataSSHSession{}).RunSCP(client.sshOptions, *options.KataLocalConfig)
+		err := (&katassh.KataSSHSession{}).RunSCP(client.sshOptions, *options.KataLocalConfig, options.EngineType)
 		if err != nil {
 			return nil, err
 		}
@@ -102,7 +103,7 @@ func (client *Client) RunKatago(options RunKatagoOptions, subCommands []string, 
 }
 
 // QueryServer queries the server
-func (client *Client) QueryServer(outputWriter io.Writer) error {
+func (client *Client) QueryServer(outputWriter io.Writer, engineType *string) error {
 	if !client.init {
 		err := client.initClient()
 		if err != nil {
@@ -110,7 +111,11 @@ func (client *Client) QueryServer(outputWriter io.Writer) error {
 		}
 	}
 	// build the ssh command
-	err := (&katassh.KataSSHSession{}).RunSSH(client.sshOptions, "query-server", outputWriter)
+	cmd := "query-server"
+	if engineType != nil && len(*engineType) > 0 {
+		cmd = cmd + " --engine-type " + *engineType
+	}
+	err := (&katassh.KataSSHSession{}).RunSSH(client.sshOptions, cmd, outputWriter)
 	if err != nil {
 		return err
 	}
@@ -142,6 +147,9 @@ func buildRunKatagoCommand(options RunKatagoOptions, subCommands []string) strin
 	}
 	cmd = cmd + fmt.Sprintf(" --refresh-interval %d", options.RefreshInterval)
 	cmd = cmd + fmt.Sprintf(" --transmit-move-num %d", options.TransmitMoveNum)
+	if options.EngineType != nil && len(*options.EngineType) > 0 {
+		cmd = cmd + fmt.Sprintf(" --engine-type %s", *options.EngineType)
+	}
 	if options.ForceNode != nil && len(*options.ForceNode) > 0 {
 		cmd = cmd + fmt.Sprintf(" --force-node %s", *options.ForceNode)
 	}
