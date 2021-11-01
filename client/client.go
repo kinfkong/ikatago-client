@@ -18,10 +18,11 @@ import (
 
 // Options represents the client options
 type Options struct {
-	World    string `json:"world"`
-	Platform string `json:"platform"`
-	Username string `json:"username"`
-	Password string `json:"password"`
+	World      string  `json:"world"`
+	Platform   string  `json:"platform"`
+	Username   string  `json:"username"`
+	Password   string  `json:"password"`
+	EngineType *string `json:"engineType"`
 }
 
 // RunKatagoOptions represents the run katago options
@@ -103,13 +104,14 @@ func (client *Client) RunKatago(options RunKatagoOptions, subCommands []string, 
 }
 
 // QueryServer queries the server
-func (client *Client) QueryServer(outputWriter io.Writer, engineType *string) error {
+func (client *Client) QueryServer(outputWriter io.Writer) error {
 	if !client.init {
 		err := client.initClient()
 		if err != nil {
 			return err
 		}
 	}
+	engineType := client.options.EngineType
 	// build the ssh command
 	cmd := "query-server"
 	if engineType != nil && len(*engineType) > 0 {
@@ -120,6 +122,14 @@ func (client *Client) QueryServer(outputWriter io.Writer, engineType *string) er
 		return err
 	}
 	return nil
+}
+
+func (client *Client) SetEngineType(engineType *string) {
+	client.options.EngineType = engineType
+}
+
+func (client *Client) GetEngineType() *string {
+	return client.options.EngineType
 }
 
 func buildRunKatagoCommand(options RunKatagoOptions, subCommands []string) string {

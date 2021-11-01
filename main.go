@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	AppVersion = "1.3.4"
+	AppVersion = "1.3.5"
 )
 
 var opts struct {
@@ -48,10 +48,11 @@ func main() {
 	l.Printf("DEBUG the world is: %s\n", *opts.World)
 	l.Printf("DEBUG Platform: [%s] User: [%s]\n", opts.Platform, opts.Username)
 	remoteClient, err := client.NewClient(client.Options{
-		World:    *opts.World,
-		Platform: opts.Platform,
-		Username: opts.Username,
-		Password: opts.Password,
+		World:      *opts.World,
+		Platform:   opts.Platform,
+		Username:   opts.Username,
+		Password:   opts.Password,
+		EngineType: opts.EngineType,
 	})
 	if err != nil {
 		log.Fatal("Failed to create client.", err)
@@ -77,7 +78,7 @@ func main() {
 		sessionResult.Wait()
 	} else if opts.Command == "query-server" {
 		// run katago command
-		err := remoteClient.QueryServer(os.Stdout, opts.EngineType)
+		err := remoteClient.QueryServer(os.Stdout)
 		if err != nil {
 			log.Fatal("Failed to query server.", err)
 		}

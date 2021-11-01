@@ -79,13 +79,21 @@ func NewClient(world string, platform string, username string, password string) 
 }
 
 // QueryServer queries the server info
-func (client *Client) QueryServer(engineType *string) (string, error) {
+func (client *Client) QueryServer() (string, error) {
 	buf := bytes.NewBuffer(nil)
-	err := client.remoteClient.QueryServer(buf, engineType)
+	err := client.remoteClient.QueryServer(buf)
 	if err != nil {
 		return "", err
 	}
 	return buf.String(), nil
+}
+
+func (client *Client) SetEngineType(engineType string) {
+	if len(engineType) > 0 {
+		client.remoteClient.SetEngineType(&engineType)
+	} else {
+		client.remoteClient.SetEngineType(nil)
+	}
 }
 
 // CreateKatagoRunner creates  the katago runner
@@ -98,6 +106,7 @@ func (client *Client) CreateKatagoRunner() (*KatagoRunner, error) {
 		useRawData:      false,
 		subCommands:     make([]string, 0),
 		started:         false,
+		engineType:      client.remoteClient.GetEngineType(),
 	}, nil
 }
 
