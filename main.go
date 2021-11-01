@@ -21,7 +21,7 @@ var opts struct {
 	Password           string  `long:"password" description:"Your password to connect" required:"true"`
 	NoCompress         bool    `long:"no-compress" description:"compress the data during transmission"`
 	RefreshInterval    int     `long:"refresh-interval" description:"sets the refresh interval in cent seconds" default:"30"`
-	EngineType         *string `long:"engine-type" description:"sets the enginetype" default:"katago"`
+	EngineType         *string `long:"engine-type" description:"sets the enginetype"`
 	TransmitMoveNum    int     `long:"transmit-move-num" description:"limits number of moves when transmission during analyze" default:"20"`
 	KataLocalConfig    *string `long:"kata-local-config" description:"The katago config file. like, gtp_example.cfg"`
 	KataOverrideConfig *string `long:"kata-override-config" description:"The katago override-config, like: analysisPVLen=30,numSearchThreads=30"`
