@@ -21,7 +21,7 @@ type KataSSHSession struct {
 }
 
 // RunSSH runs the ssh command
-func (kataSSHSession *KataSSHSession) RunSSH(sshoptions model.SSHOptions, cmd string, outputWriter io.Writer) error {
+func (kataSSHSession *KataSSHSession) RunSSH(sshoptions model.SSHOptions, cmd string, stdinReader io.Reader, stderrWriter io.Writer, outputWriter io.Writer) error {
 	config := &ssh.ClientConfig{
 		Timeout:         30 * time.Second,
 		User:            sshoptions.User,
@@ -46,8 +46,8 @@ func (kataSSHSession *KataSSHSession) RunSSH(sshoptions model.SSHOptions, cmd st
 	}
 	kataSSHSession.Session = session
 	defer session.Close()
-	session.Stderr = os.Stderr
-	session.Stdin = os.Stdin
+	session.Stderr = stderrWriter
+	session.Stdin = stdinReader
 	session.Stdout = outputWriter
 
 	log.Printf("DEBUG running equal commad: ssh -p %d %s@%s %s\n", sshoptions.Port, sshoptions.User, sshoptions.Host, cmd)

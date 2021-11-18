@@ -117,7 +117,13 @@ func (client *Client) QueryServer(outputWriter io.Writer) error {
 	if engineType != nil && len(*engineType) > 0 {
 		cmd = cmd + " --engine-type " + *engineType
 	}
-	err := (&katassh.KataSSHSession{}).RunSSH(client.sshOptions, cmd, outputWriter)
+	stdinReader, mockWriter := io.Pipe()
+	mockReader, stderrWriter := io.Pipe()
+	defer mockWriter.Close()
+	defer stdinReader.Close()
+	defer mockReader.Close()
+	defer stderrWriter.Close()
+	err := (&katassh.KataSSHSession{}).RunSSH(client.sshOptions, cmd, stdinReader, stderrWriter, outputWriter)
 	if err != nil {
 		return err
 	}

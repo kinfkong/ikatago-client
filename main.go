@@ -7,6 +7,7 @@ import (
 
 	"github.com/jessevdk/go-flags"
 	"github.com/kinfkong/ikatago-client/client"
+	"github.com/kinfkong/ikatago-client/ikatagosdk"
 	"github.com/kinfkong/ikatago-client/utils"
 )
 
@@ -31,6 +32,12 @@ var opts struct {
 	KataWeight *string `long:"kata-weight" description:"The katago weight name"`
 	KataConfig *string `long:"kata-config" description:"The katago config name"`
 	Command    string  `long:"cmd" description:"The command to run the katago" default:"run-katago"`
+}
+
+func TestSDK() {
+	client, _ := ikatagosdk.NewClient("", "all", "zz-xxxx", "834173")
+	result, _ := client.QueryServer()
+	log.Printf("DEBUG query result: %v", result)
 }
 
 func main() {
