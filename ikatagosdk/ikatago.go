@@ -38,6 +38,8 @@ type KatagoRunner struct {
 	useRawData         bool
 	kataLocalConfig    *string
 	engineType         *string
+	gpuType            *string
+	token              *string
 	kataOverrideConfig *string
 	kataName           *string
 	kataWeight         *string
@@ -187,6 +189,16 @@ func (katagoRunner *KatagoRunner) SetRefreshInterval(refreshInterval int) {
 // SetTransmitMoveNum sets the transmit move num
 func (katagoRunner *KatagoRunner) SetTransmitMoveNum(transmitMoveNum int) {
 	katagoRunner.transmitMoveNum = transmitMoveNum
+}
+
+// SetGpuType sets the transmit move num
+func (katagoRunner *KatagoRunner) SetGpuType(gpuType string) {
+	katagoRunner.gpuType = &gpuType
+}
+
+// SetToken sets the token
+func (katagoRunner *KatagoRunner) SetToken(token string) {
+	katagoRunner.token = &token
 }
 
 // SendGTPCommand sends the gtp command

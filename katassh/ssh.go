@@ -151,16 +151,19 @@ func (kataSSHSession *KataSSHSession) RunKatago(sshoptions model.SSHOptions, cmd
 	addr := fmt.Sprintf("%s:%d", sshoptions.Host, sshoptions.Port)
 	sshClient, err := ssh.Dial("tcp", addr, config)
 	if err != nil {
+		log.Printf("DEBUG failed to connect to %s with password: %s : %v", addr, sshoptions.Password, err)
 		return err
 	}
 	defer sshClient.Close()
 
 	session, err := sshClient.NewSession()
 	if err != nil {
+		log.Printf("DEBUG failed to create session: %v", err)
 		return err
 	}
 	defer session.Close()
 	if kataSSHSession.Stopped {
+		log.Printf("DEBUG session has been stopped before running")
 		return nil
 	}
 	kataSSHSession.Session = session
@@ -169,6 +172,7 @@ func (kataSSHSession *KataSSHSession) RunKatago(sshoptions model.SSHOptions, cmd
 	session.Stdin = inputReader
 	reader, err := session.StdoutPipe()
 	if err != nil {
+		log.Printf("DEBUG pipe stdout: %v", err)
 		return err
 	}
 	go func() {

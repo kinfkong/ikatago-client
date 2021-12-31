@@ -38,6 +38,8 @@ type RunKatagoOptions struct {
 	KataOverrideConfig *string
 	UseRawData         bool
 	ForceNode          *string
+	GpuType            *string
+	Token              *string
 }
 
 // Client represents the ikatago client
@@ -168,6 +170,12 @@ func buildRunKatagoCommand(options RunKatagoOptions, subCommands []string) strin
 	}
 	if options.ForceNode != nil && len(*options.ForceNode) > 0 {
 		cmd = cmd + fmt.Sprintf(" --force-node %s", *options.ForceNode)
+	}
+	if options.GpuType != nil && len(*options.GpuType) > 0 {
+		cmd = cmd + fmt.Sprintf(" --gpu-type %s", *options.GpuType)
+	}
+	if options.Token != nil && len(*options.Token) > 0 {
+		cmd = cmd + fmt.Sprintf(" --token %s", *options.Token)
 	}
 	if len(subCommands) > 0 {
 		cmd = cmd + " -- " + strings.Join(subCommands, " ")

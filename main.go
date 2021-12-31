@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	AppVersion = "1.4.0"
+	AppVersion = "1.4.1"
 )
 
 var opts struct {
@@ -23,6 +23,8 @@ var opts struct {
 	NoCompress         bool    `long:"no-compress" description:"compress the data during transmission"`
 	RefreshInterval    int     `long:"refresh-interval" description:"sets the refresh interval in cent seconds" default:"30"`
 	EngineType         *string `long:"engine-type" description:"sets the enginetype"`
+	Token              *string `long:"token" description:"sets the token"`
+	GpuType            *string `long:"gpu-type" description:"sets the gpu type"`
 	TransmitMoveNum    int     `long:"transmit-move-num" description:"limits number of moves when transmission during analyze" default:"20"`
 	KataLocalConfig    *string `long:"kata-local-config" description:"The katago config file. like, gtp_example.cfg"`
 	KataOverrideConfig *string `long:"kata-override-config" description:"The katago override-config, like: analysisPVLen=30,numSearchThreads=30"`
@@ -40,7 +42,13 @@ func TestSDK() {
 	log.Printf("DEBUG query result: %v", result)
 }
 
+/*func testSomething() {
+	a := 1637380857
+	log.Printf("%x", a)
+}*/
 func main() {
+	// testSomething()
+	// return
 	l := log.New(os.Stderr, "", 0)
 	fmt.Fprintln(os.Stderr, "ikatago version: ", AppVersion)
 	// parse args
@@ -65,7 +73,6 @@ func main() {
 		log.Fatal("Failed to create client.", err)
 	}
 	if opts.Command == "run-katago" {
-		// run katago command
 		sessionResult, err := remoteClient.RunKatago(client.RunKatagoOptions{
 			NoCompress:         opts.NoCompress,
 			RefreshInterval:    opts.RefreshInterval,
@@ -78,8 +85,11 @@ func main() {
 			KataName:           opts.KataName,
 			UseRawData:         false,
 			ForceNode:          opts.ForceNode,
+			GpuType:            opts.GpuType,
+			Token:              opts.Token,
 		}, subCommands, os.Stdin, os.Stdout, os.Stderr, nil)
 		if err != nil {
+			log.Printf("ERROR run katago failed: %v", err)
 			log.Fatal("Failed to run katago.", err)
 		}
 		sessionResult.Wait()
