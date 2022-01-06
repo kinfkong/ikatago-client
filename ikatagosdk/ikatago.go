@@ -123,6 +123,8 @@ func (katagoRunner *KatagoRunner) Run(callback DataCallback) error {
 		KataLocalConfig:    katagoRunner.kataLocalConfig,
 		KataOverrideConfig: katagoRunner.kataOverrideConfig,
 		KataName:           katagoRunner.kataName,
+		GpuType:            katagoRunner.gpuType,
+		Token:              katagoRunner.token,
 		KataWeight:         katagoRunner.kataWeight,
 		KataConfig:         katagoRunner.kataConfig,
 		UseRawData:         katagoRunner.useRawData,
