@@ -1,11 +1,7 @@
 # ikatago-client
-这是连接ikatago-server （比如百度aistudio)的客户端。
+这是连接ikatago-server的客户端。
 
 暂时没时间写文档，有问题加群: 703409387
-
-## 准备
-1. 确保百度aistudio里的ikatago-server处于运行状态。  
-   （看不懂这句话啥意思的点这里: https://aistudio.baidu.com/aistudio/projectdetail/681506?shared=1)
 
 ## 下载ikagato客户端
 
