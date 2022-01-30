@@ -50,7 +50,7 @@ func (callback *MockDataCallback) OnReady() {
 }
 
 func TestSDK() {
-	client, _ := ikatagosdk.NewClient("", "all", "zz-go1", "820318")
+	client, _ := ikatagosdk.NewClient("", "all", "zz-xxx", "xxxx")
 	client.SetExtraArgs("--gpu-type 6x --kata-weight 60b")
 	// query server
 	result, _ := client.QueryServer()
