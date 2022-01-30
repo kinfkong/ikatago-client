@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	AppVersion = "1.5.0"
+	AppVersion = "1.5.1"
 )
 
 var opts struct {
