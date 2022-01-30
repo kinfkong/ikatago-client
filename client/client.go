@@ -23,6 +23,9 @@ type Options struct {
 	Username   string  `json:"username"`
 	Password   string  `json:"password"`
 	EngineType *string `json:"engineType"`
+	ForceNode  *string `json:"forceNode"`
+	GpuType    *string `json:"gpuType"`
+	Token      *string `json:"token"`
 }
 
 // RunKatagoOptions represents the run katago options
@@ -31,15 +34,11 @@ type RunKatagoOptions struct {
 	RefreshInterval    int
 	TransmitMoveNum    int
 	KataLocalConfig    *string
-	EngineType         *string
 	KataName           *string
 	KataWeight         *string
 	KataConfig         *string
 	KataOverrideConfig *string
 	UseRawData         bool
-	ForceNode          *string
-	GpuType            *string
-	Token              *string
 }
 
 // Client represents the ikatago client
@@ -83,7 +82,7 @@ func (client *Client) RunKatago(options RunKatagoOptions, subCommands []string, 
 	}
 	if options.KataLocalConfig != nil {
 		// run scp to copy the configure
-		err := (&katassh.KataSSHSession{}).RunSCP(client.sshOptions, *options.KataLocalConfig, options.EngineType)
+		err := (&katassh.KataSSHSession{}).RunSCP(client.sshOptions, *options.KataLocalConfig, client.BuildServerLocationOptions())
 		if err != nil {
 			return nil, err
 		}
@@ -95,7 +94,7 @@ func (client *Client) RunKatago(options RunKatagoOptions, subCommands []string, 
 	// build the ssh command
 	result.wg.Add(1)
 	go func() {
-		err := s.RunKatago(client.sshOptions, buildRunKatagoCommand(options, subCommands), inputReader, outputWriter, stderrWriter, options.UseRawData, onReady)
+		err := s.RunKatago(client.sshOptions, client.BuildRunKatagoCommand(options, subCommands), inputReader, outputWriter, stderrWriter, options.UseRawData, onReady)
 		if err != nil {
 			result.Err = err
 		}
@@ -113,12 +112,24 @@ func (client *Client) QueryServer(outputWriter io.Writer) error {
 			return err
 		}
 	}
-	engineType := client.options.EngineType
+
 	// build the ssh command
 	cmd := "query-server"
-	if engineType != nil && len(*engineType) > 0 {
-		cmd = cmd + " --engine-type " + *engineType
+
+	// build options with server related options
+	if client.options.EngineType != nil && len(*client.options.EngineType) > 0 {
+		cmd = cmd + fmt.Sprintf(" --engine-type %s", *client.options.EngineType)
 	}
+	if client.options.ForceNode != nil && len(*client.options.ForceNode) > 0 {
+		cmd = cmd + fmt.Sprintf(" --force-node %s", *client.options.ForceNode)
+	}
+	if client.options.GpuType != nil && len(*client.options.GpuType) > 0 {
+		cmd = cmd + fmt.Sprintf(" --gpu-type %s", *client.options.GpuType)
+	}
+	if client.options.Token != nil && len(*client.options.Token) > 0 {
+		cmd = cmd + fmt.Sprintf(" --token %s", *client.options.Token)
+	}
+
 	stdinReader, mockWriter := io.Pipe()
 	mockReader, stderrWriter := io.Pipe()
 	defer mockWriter.Close()
@@ -132,15 +143,7 @@ func (client *Client) QueryServer(outputWriter io.Writer) error {
 	return nil
 }
 
-func (client *Client) SetEngineType(engineType *string) {
-	client.options.EngineType = engineType
-}
-
-func (client *Client) GetEngineType() *string {
-	return client.options.EngineType
-}
-
-func buildRunKatagoCommand(options RunKatagoOptions, subCommands []string) string {
+func (client *Client) BuildRunKatagoCommand(options RunKatagoOptions, subCommands []string) string {
 	cmd := "run-katago"
 	kataName := options.KataName
 	kataWeight := options.KataWeight
@@ -165,17 +168,11 @@ func buildRunKatagoCommand(options RunKatagoOptions, subCommands []string) strin
 	}
 	cmd = cmd + fmt.Sprintf(" --refresh-interval %d", options.RefreshInterval)
 	cmd = cmd + fmt.Sprintf(" --transmit-move-num %d", options.TransmitMoveNum)
-	if options.EngineType != nil && len(*options.EngineType) > 0 {
-		cmd = cmd + fmt.Sprintf(" --engine-type %s", *options.EngineType)
-	}
-	if options.ForceNode != nil && len(*options.ForceNode) > 0 {
-		cmd = cmd + fmt.Sprintf(" --force-node %s", *options.ForceNode)
-	}
-	if options.GpuType != nil && len(*options.GpuType) > 0 {
-		cmd = cmd + fmt.Sprintf(" --gpu-type %s", *options.GpuType)
-	}
-	if options.Token != nil && len(*options.Token) > 0 {
-		cmd = cmd + fmt.Sprintf(" --token %s", *options.Token)
+
+	// build options with server related options
+	serverLocationOptions := client.BuildServerLocationOptions()
+	if len(serverLocationOptions) > 0 {
+		cmd = cmd + serverLocationOptions
 	}
 	if len(subCommands) > 0 {
 		cmd = cmd + " -- " + strings.Join(subCommands, " ")
@@ -188,6 +185,23 @@ func buildRunKatagoCommand(options RunKatagoOptions, subCommands []string) strin
 	return cmd
 }
 
+func (client *Client) BuildServerLocationOptions() string {
+	cmd := ""
+	// build options with server related options
+	if client.options.EngineType != nil && len(*client.options.EngineType) > 0 {
+		cmd = cmd + fmt.Sprintf(" --engine-type %s", *client.options.EngineType)
+	}
+	if client.options.ForceNode != nil && len(*client.options.ForceNode) > 0 {
+		cmd = cmd + fmt.Sprintf(" --force-node %s", *client.options.ForceNode)
+	}
+	if client.options.GpuType != nil && len(*client.options.GpuType) > 0 {
+		cmd = cmd + fmt.Sprintf(" --gpu-type %s", *client.options.GpuType)
+	}
+	if client.options.Token != nil && len(*client.options.Token) > 0 {
+		cmd = cmd + fmt.Sprintf(" --token %s", *client.options.Token)
+	}
+	return cmd
+}
 func (client *Client) initClient() error {
 	platform, err := client.getPlatformFromWorld()
 	if err != nil {

@@ -37,9 +37,6 @@ type KatagoRunner struct {
 	transmitMoveNum    int
 	useRawData         bool
 	kataLocalConfig    *string
-	engineType         *string
-	gpuType            *string
-	token              *string
 	kataOverrideConfig *string
 	kataName           *string
 	kataWeight         *string
@@ -90,14 +87,6 @@ func (client *Client) QueryServer() (string, error) {
 	return buf.String(), nil
 }
 
-func (client *Client) SetEngineType(engineType string) {
-	if len(engineType) > 0 {
-		client.remoteClient.SetEngineType(&engineType)
-	} else {
-		client.remoteClient.SetEngineType(nil)
-	}
-}
-
 // CreateKatagoRunner creates  the katago runner
 func (client *Client) CreateKatagoRunner() (*KatagoRunner, error) {
 	return &KatagoRunner{
@@ -108,7 +97,6 @@ func (client *Client) CreateKatagoRunner() (*KatagoRunner, error) {
 		useRawData:      false,
 		subCommands:     make([]string, 0),
 		started:         false,
-		engineType:      client.remoteClient.GetEngineType(),
 	}, nil
 }
 
@@ -118,13 +106,10 @@ func (katagoRunner *KatagoRunner) Run(callback DataCallback) error {
 	options := client.RunKatagoOptions{
 		NoCompress:         katagoRunner.noCompress,
 		RefreshInterval:    katagoRunner.refreshInterval,
-		EngineType:         katagoRunner.engineType,
 		TransmitMoveNum:    katagoRunner.transmitMoveNum,
 		KataLocalConfig:    katagoRunner.kataLocalConfig,
 		KataOverrideConfig: katagoRunner.kataOverrideConfig,
 		KataName:           katagoRunner.kataName,
-		GpuType:            katagoRunner.gpuType,
-		Token:              katagoRunner.token,
 		KataWeight:         katagoRunner.kataWeight,
 		KataConfig:         katagoRunner.kataConfig,
 		UseRawData:         katagoRunner.useRawData,
@@ -193,16 +178,6 @@ func (katagoRunner *KatagoRunner) SetTransmitMoveNum(transmitMoveNum int) {
 	katagoRunner.transmitMoveNum = transmitMoveNum
 }
 
-// SetGpuType sets the transmit move num
-func (katagoRunner *KatagoRunner) SetGpuType(gpuType string) {
-	katagoRunner.gpuType = &gpuType
-}
-
-// SetToken sets the token
-func (katagoRunner *KatagoRunner) SetToken(token string) {
-	katagoRunner.token = &token
-}
-
 // SendGTPCommand sends the gtp command
 func (katagoRunner *KatagoRunner) SendGTPCommand(command string) error {
 	_, err := io.WriteString(katagoRunner.commandWriter, command)
@@ -220,11 +195,6 @@ func (katagoRunner *KatagoRunner) SetUseRawData(useRawData bool) {
 // SetSubCommands sets the subcommands. for example: 'analysis -analysis-threads 12'
 func (katagoRunner *KatagoRunner) SetSubCommands(subCommands string) {
 	katagoRunner.subCommands = strings.Split(subCommands, " ")
-}
-
-// SetEngineType sets the engineType. for example: 'katago', 'gomoku'
-func (katagoRunner *KatagoRunner) SetEngineType(engineType string) {
-	katagoRunner.engineType = &engineType
 }
 
 // Stop stops the katago engine

@@ -68,6 +68,9 @@ func main() {
 		Username:   opts.Username,
 		Password:   opts.Password,
 		EngineType: opts.EngineType,
+		ForceNode:  opts.ForceNode,
+		GpuType:    opts.GpuType,
+		Token:      opts.Token,
 	})
 	if err != nil {
 		log.Fatal("Failed to create client.", err)
@@ -76,7 +79,6 @@ func main() {
 		sessionResult, err := remoteClient.RunKatago(client.RunKatagoOptions{
 			NoCompress:         opts.NoCompress,
 			RefreshInterval:    opts.RefreshInterval,
-			EngineType:         opts.EngineType,
 			TransmitMoveNum:    opts.TransmitMoveNum,
 			KataLocalConfig:    opts.KataLocalConfig,
 			KataOverrideConfig: opts.KataOverrideConfig,
@@ -84,9 +86,6 @@ func main() {
 			KataWeight:         opts.KataWeight,
 			KataName:           opts.KataName,
 			UseRawData:         false,
-			ForceNode:          opts.ForceNode,
-			GpuType:            opts.GpuType,
-			Token:              opts.Token,
 		}, subCommands, os.Stdin, os.Stdout, os.Stderr, nil)
 		if err != nil {
 			log.Printf("ERROR run katago failed: %v", err)
