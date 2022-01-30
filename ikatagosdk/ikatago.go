@@ -77,6 +77,31 @@ func NewClient(world string, platform string, username string, password string) 
 	}, nil
 }
 
+// SetExtraArgs sets the extra args like "--gpu-type 3x --engine-type katago"
+func (client *Client) SetExtraArgs(extraArgs string) {
+
+}
+
+// SetToken sets the token
+func (client *Client) SetToken(token string) {
+	client.remoteClient.Options.Token = &token
+}
+
+// SetToken sets the force node
+func (client *Client) SetForceNode(forceNode string) {
+	client.remoteClient.Options.ForceNode = &forceNode
+}
+
+// SetGpuType sets the gpu type
+func (client *Client) SetGpuType(gpuType string) {
+	client.remoteClient.Options.GpuType = &gpuType
+}
+
+// SetEngineType sets the engine type
+func (client *Client) SetEngineType(engineType string) {
+	client.remoteClient.Options.EngineType = &engineType
+}
+
 // QueryServer queries the server info
 func (client *Client) QueryServer() (string, error) {
 	buf := bytes.NewBuffer(nil)

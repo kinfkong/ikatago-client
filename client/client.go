@@ -43,8 +43,8 @@ type RunKatagoOptions struct {
 
 // Client represents the ikatago client
 type Client struct {
+	Options    Options
 	init       bool
-	options    Options
 	sshOptions model.SSHOptions
 }
 
@@ -67,7 +67,7 @@ func (s *SessionResult) Wait() {
 // NewClient creates the client
 func NewClient(options Options) (*Client, error) {
 	return &Client{
-		options: options,
+		Options: options,
 		init:    false,
 	}, nil
 }
@@ -117,17 +117,9 @@ func (client *Client) QueryServer(outputWriter io.Writer) error {
 	cmd := "query-server"
 
 	// build options with server related options
-	if client.options.EngineType != nil && len(*client.options.EngineType) > 0 {
-		cmd = cmd + fmt.Sprintf(" --engine-type %s", *client.options.EngineType)
-	}
-	if client.options.ForceNode != nil && len(*client.options.ForceNode) > 0 {
-		cmd = cmd + fmt.Sprintf(" --force-node %s", *client.options.ForceNode)
-	}
-	if client.options.GpuType != nil && len(*client.options.GpuType) > 0 {
-		cmd = cmd + fmt.Sprintf(" --gpu-type %s", *client.options.GpuType)
-	}
-	if client.options.Token != nil && len(*client.options.Token) > 0 {
-		cmd = cmd + fmt.Sprintf(" --token %s", *client.options.Token)
+	serverLocationOptions := client.BuildServerLocationOptions()
+	if len(serverLocationOptions) > 0 {
+		cmd = cmd + serverLocationOptions
 	}
 
 	stdinReader, mockWriter := io.Pipe()
@@ -188,17 +180,17 @@ func (client *Client) BuildRunKatagoCommand(options RunKatagoOptions, subCommand
 func (client *Client) BuildServerLocationOptions() string {
 	cmd := ""
 	// build options with server related options
-	if client.options.EngineType != nil && len(*client.options.EngineType) > 0 {
-		cmd = cmd + fmt.Sprintf(" --engine-type %s", *client.options.EngineType)
+	if client.Options.EngineType != nil && len(*client.Options.EngineType) > 0 {
+		cmd = cmd + fmt.Sprintf(" --engine-type %s", *client.Options.EngineType)
 	}
-	if client.options.ForceNode != nil && len(*client.options.ForceNode) > 0 {
-		cmd = cmd + fmt.Sprintf(" --force-node %s", *client.options.ForceNode)
+	if client.Options.ForceNode != nil && len(*client.Options.ForceNode) > 0 {
+		cmd = cmd + fmt.Sprintf(" --force-node %s", *client.Options.ForceNode)
 	}
-	if client.options.GpuType != nil && len(*client.options.GpuType) > 0 {
-		cmd = cmd + fmt.Sprintf(" --gpu-type %s", *client.options.GpuType)
+	if client.Options.GpuType != nil && len(*client.Options.GpuType) > 0 {
+		cmd = cmd + fmt.Sprintf(" --gpu-type %s", *client.Options.GpuType)
 	}
-	if client.options.Token != nil && len(*client.options.Token) > 0 {
-		cmd = cmd + fmt.Sprintf(" --token %s", *client.options.Token)
+	if client.Options.Token != nil && len(*client.Options.Token) > 0 {
+		cmd = cmd + fmt.Sprintf(" --token %s", *client.Options.Token)
 	}
 	return cmd
 }
@@ -220,7 +212,7 @@ func (client *Client) getPlatformFromWorld() (*platform.Platform, error) {
 	type World struct {
 		Platforms []platform.Platform `json:"platforms"`
 	}
-	worldJSONString, err := utils.DoHTTPRequest("GET", client.options.World, nil, nil)
+	worldJSONString, err := utils.DoHTTPRequest("GET", client.Options.World, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -230,11 +222,11 @@ func (client *Client) getPlatformFromWorld() (*platform.Platform, error) {
 		return nil, err
 	}
 	for _, platform := range world.Platforms {
-		if platform.Name == client.options.Platform {
+		if platform.Name == client.Options.Platform {
 			return &platform, nil
 		}
 	}
-	log.Printf("ERROR platform not found in the world. platform: %s", client.options.Platform)
+	log.Printf("ERROR platform not found in the world. platform: %s", client.Options.Platform)
 	return nil, errors.New("platform_not_found")
 }
 
@@ -242,9 +234,9 @@ func (client *Client) getPlatformFromWorld() (*platform.Platform, error) {
 func (client *Client) getSSHOptions(p *platform.Platform) (*model.SSHOptions, error) {
 	sshJSONURL := ""
 	if p.Http != nil && p.Http.GetUrl != nil {
-		sshJSONURL = *p.Http.GetUrl + "/users/" + client.options.Username + ".ssh.json"
+		sshJSONURL = *p.Http.GetUrl + "/users/" + client.Options.Username + ".ssh.json"
 	} else {
-		sshJSONURL = "https://" + p.Oss.Bucket + "." + p.Oss.BucketEndpoint + "/users/" + client.options.Username + ".ssh.json"
+		sshJSONURL = "https://" + p.Oss.Bucket + "." + p.Oss.BucketEndpoint + "/users/" + client.Options.Username + ".ssh.json"
 	}
 	response, err := utils.DoHTTPRequest("GET", sshJSONURL, nil, nil)
 	if err != nil {
@@ -258,6 +250,6 @@ func (client *Client) getSSHOptions(p *platform.Platform) (*model.SSHOptions, er
 		log.Printf("ERROR failed parsing json: %s\n", response)
 		return nil, err
 	}
-	sshoptions.Password = client.options.Password
+	sshoptions.Password = client.Options.Password
 	return &sshoptions, nil
 }
