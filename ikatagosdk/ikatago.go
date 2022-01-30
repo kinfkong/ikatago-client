@@ -6,13 +6,30 @@ import (
 	"strings"
 	"time"
 
+	"github.com/jessevdk/go-flags"
 	"github.com/kinfkong/ikatago-client/client"
 	"github.com/kinfkong/ikatago-client/utils"
 )
 
+type genericOptions struct {
+	NoCompress         *bool   `long:"no-compress" description:"compress the data during transmission"`
+	RefreshInterval    *int    `long:"refresh-interval" description:"sets the refresh interval in cent seconds"`
+	TransmitMoveNum    *int    `long:"transmit-move-num" description:"limits number of moves when transmission during analyze"`
+	KataLocalConfig    *string `long:"kata-local-config" description:"The katago config file. like, gtp_example.cfg"`
+	KataOverrideConfig *string `long:"kata-override-config" description:"The katago override-config, like: analysisPVLen=30,numSearchThreads=30"`
+	KataName           *string `long:"kata-name" description:"The katago binary name"`
+	KataWeight         *string `long:"kata-weight" description:"The katago weight name"`
+	KataConfig         *string `long:"kata-config" description:"The katago config name"`
+	EngineType         *string `long:"engine-type" description:"sets the enginetype"`
+	ForceNode          *string `long:"force-node" description:"in cluster, force to a specific node."`
+	Token              *string `long:"token" description:"sets the token"`
+	GpuType            *string `long:"gpu-type" description:"sets the gpu type"`
+}
+
 // Client the client wrapper
 type Client struct {
 	remoteClient *client.Client
+	extraArgs    *string
 }
 
 // DataCallbackFunc Represents the data callback function
@@ -79,7 +96,24 @@ func NewClient(world string, platform string, username string, password string) 
 
 // SetExtraArgs sets the extra args like "--gpu-type 3x --engine-type katago"
 func (client *Client) SetExtraArgs(extraArgs string) {
-
+	opts := genericOptions{}
+	_, err := flags.ParseArgs(&opts, strings.Split(extraArgs, " "))
+	if err != nil {
+		return
+	}
+	if opts.EngineType != nil {
+		client.SetEngineType(*opts.EngineType)
+	}
+	if opts.GpuType != nil {
+		client.SetGpuType(*opts.GpuType)
+	}
+	if opts.ForceNode != nil {
+		client.SetForceNode(*opts.ForceNode)
+	}
+	if opts.Token != nil {
+		client.SetToken(*opts.Token)
+	}
+	client.extraArgs = &extraArgs
 }
 
 // SetToken sets the token
@@ -114,7 +148,7 @@ func (client *Client) QueryServer() (string, error) {
 
 // CreateKatagoRunner creates  the katago runner
 func (client *Client) CreateKatagoRunner() (*KatagoRunner, error) {
-	return &KatagoRunner{
+	runner := &KatagoRunner{
 		client:          client,
 		refreshInterval: 30,
 		transmitMoveNum: 25,
@@ -122,7 +156,42 @@ func (client *Client) CreateKatagoRunner() (*KatagoRunner, error) {
 		useRawData:      false,
 		subCommands:     make([]string, 0),
 		started:         false,
-	}, nil
+	}
+	if client.extraArgs != nil {
+		opts := genericOptions{}
+		subCommands, err := flags.ParseArgs(&opts, strings.Split(*client.extraArgs, " "))
+		if err == nil {
+			if len(subCommands) > 0 {
+				runner.SetSubCommands(strings.Join(subCommands, " "))
+			}
+			if opts.KataWeight != nil {
+				runner.SetKataWeight(*opts.KataWeight)
+			}
+			if opts.KataConfig != nil {
+				runner.SetKataConfig(*opts.KataConfig)
+			}
+			if opts.KataName != nil {
+				runner.SetKataName(*opts.KataName)
+			}
+			if opts.KataOverrideConfig != nil {
+				runner.SetKataOverrideConfig(*opts.KataOverrideConfig)
+			}
+			if opts.NoCompress != nil {
+				runner.DisableCompress(*opts.NoCompress)
+			}
+			if opts.RefreshInterval != nil {
+				runner.SetRefreshInterval(*opts.RefreshInterval)
+			}
+			if opts.TransmitMoveNum != nil {
+				runner.SetTransmitMoveNum(*opts.TransmitMoveNum)
+			}
+			if opts.KataLocalConfig != nil {
+				runner.SetKataLocalConfig(*opts.KataLocalConfig)
+			}
+		}
+
+	}
+	return runner, nil
 }
 
 // Run runs the katago

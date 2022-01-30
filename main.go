@@ -36,19 +36,36 @@ var opts struct {
 	Command    string  `long:"cmd" description:"The command to run the katago" default:"run-katago"`
 }
 
-func TestSDK() {
-	client, _ := ikatagosdk.NewClient("", "all", "zz-xxxx", "834173")
-	result, _ := client.QueryServer()
-	log.Printf("DEBUG query result: %v", result)
+type MockDataCallback struct {
 }
 
-/*func testSomething() {
-	a := 1637380857
-	log.Printf("%x", a)
-}*/
+func (callback *MockDataCallback) Callback(content []byte) {
+	log.Printf(string(content))
+
+}
+func (callback *MockDataCallback) StderrCallback(content []byte) {
+	log.Printf(string(content))
+}
+func (callback *MockDataCallback) OnReady() {
+}
+
+func TestSDK() {
+	client, _ := ikatagosdk.NewClient("", "all", "zz-go1", "820318")
+	client.SetExtraArgs("--gpu-type 6x --kata-weight 60b")
+	// query server
+	result, _ := client.QueryServer()
+	log.Printf("DEBUG query result: %v", result)
+	// run katago
+	runner, _ := client.CreateKatagoRunner()
+	var callback ikatagosdk.DataCallback = &MockDataCallback{}
+
+	runner.Run(callback)
+
+}
+
 func main() {
-	// testSomething()
-	// return
+	/*TestSDK()
+	return*/
 	l := log.New(os.Stderr, "", 0)
 	fmt.Fprintln(os.Stderr, "ikatago version: ", AppVersion)
 	// parse args
