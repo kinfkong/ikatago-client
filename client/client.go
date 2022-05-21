@@ -94,7 +94,39 @@ func (client *Client) RunKatago(options RunKatagoOptions, subCommands []string, 
 	// build the ssh command
 	result.wg.Add(1)
 	go func() {
-		err := s.RunKatago(client.sshOptions, client.BuildRunKatagoCommand(options, subCommands), inputReader, outputWriter, stderrWriter, options.UseRawData, onReady)
+		err := s.RunKatago(client.sshOptions, client.BuildKatagoCommand("run-katago", options, subCommands), inputReader, outputWriter, stderrWriter, options.UseRawData, onReady)
+		if err != nil {
+			result.Err = err
+		}
+		result.wg.Done()
+	}()
+
+	return &result, nil
+}
+
+// ViewConfig views the katago config
+func (client *Client) ViewConfig(options RunKatagoOptions, subCommands []string, inputReader io.Reader, outputWriter io.Writer, stderrWriter io.Writer, onReady func()) (*SessionResult, error) {
+	if !client.init {
+		err := client.initClient()
+		if err != nil {
+			return nil, err
+		}
+	}
+	if options.KataLocalConfig != nil {
+		// run scp to copy the configure
+		err := (&katassh.KataSSHSession{}).RunSCP(client.sshOptions, *options.KataLocalConfig, client.BuildServerLocationOptions())
+		if err != nil {
+			return nil, err
+		}
+	}
+	s := &katassh.KataSSHSession{}
+	result := SessionResult{
+		session: s,
+	}
+	// build the ssh command
+	result.wg.Add(1)
+	go func() {
+		err := s.RunKatago(client.sshOptions, client.BuildKatagoCommand("view-config", options, subCommands), inputReader, outputWriter, stderrWriter, options.UseRawData, onReady)
 		if err != nil {
 			result.Err = err
 		}
@@ -135,8 +167,7 @@ func (client *Client) QueryServer(outputWriter io.Writer) error {
 	return nil
 }
 
-func (client *Client) BuildRunKatagoCommand(options RunKatagoOptions, subCommands []string) string {
-	cmd := "run-katago"
+func (client *Client) BuildKatagoCommand(cmd string, options RunKatagoOptions, subCommands []string) string {
 	kataName := options.KataName
 	kataWeight := options.KataWeight
 	kataConfig := options.KataConfig

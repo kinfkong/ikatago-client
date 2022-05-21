@@ -115,6 +115,23 @@ func main() {
 		if err != nil {
 			log.Fatal("Failed to query server.", err)
 		}
+	} else if opts.Command == "view-config" {
+		sessionResult, err := remoteClient.ViewConfig(client.RunKatagoOptions{
+			NoCompress:         opts.NoCompress,
+			RefreshInterval:    opts.RefreshInterval,
+			TransmitMoveNum:    opts.TransmitMoveNum,
+			KataLocalConfig:    opts.KataLocalConfig,
+			KataOverrideConfig: opts.KataOverrideConfig,
+			KataConfig:         opts.KataConfig,
+			KataWeight:         opts.KataWeight,
+			KataName:           opts.KataName,
+			UseRawData:         false,
+		}, subCommands, os.Stdin, os.Stdout, os.Stderr, nil)
+		if err != nil {
+			log.Printf("ERROR view katago config failed: %v", err)
+			log.Fatal("Failed to view katago config.", err)
+		}
+		sessionResult.Wait()
 	} else {
 		log.Fatal(fmt.Sprintf("Unknown command: [%s]", opts.Command))
 	}
