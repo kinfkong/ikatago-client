@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	AppVersion = "1.5.1"
+	AppVersion = "1.6.0"
 )
 
 var opts struct {
@@ -116,7 +116,7 @@ func main() {
 			log.Fatal("Failed to query server.", err)
 		}
 	} else if opts.Command == "view-config" {
-		sessionResult, err := remoteClient.ViewConfig(client.RunKatagoOptions{
+		err := remoteClient.ViewConfig(client.RunKatagoOptions{
 			NoCompress:         opts.NoCompress,
 			RefreshInterval:    opts.RefreshInterval,
 			TransmitMoveNum:    opts.TransmitMoveNum,
@@ -126,12 +126,11 @@ func main() {
 			KataWeight:         opts.KataWeight,
 			KataName:           opts.KataName,
 			UseRawData:         false,
-		}, subCommands, os.Stdin, os.Stdout, os.Stderr, nil)
+		}, subCommands, os.Stdout)
 		if err != nil {
 			log.Printf("ERROR view katago config failed: %v", err)
 			log.Fatal("Failed to view katago config.", err)
 		}
-		sessionResult.Wait()
 	} else {
 		log.Fatal(fmt.Sprintf("Unknown command: [%s]", opts.Command))
 	}
