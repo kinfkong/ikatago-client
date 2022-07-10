@@ -217,7 +217,6 @@ func (katagoRunner *KatagoRunner) Run(callback DataCallback) error {
 	pr, pw := io.Pipe()
 	katagoRunner.commandWriter = pw
 	katagoRunner.reader = pr
-
 	defer pw.Close()
 	defer pr.Close()
 
@@ -274,6 +273,10 @@ func (katagoRunner *KatagoRunner) SetTransmitMoveNum(transmitMoveNum int) {
 
 // SendGTPCommand sends the gtp command
 func (katagoRunner *KatagoRunner) SendGTPCommand(command string) error {
+	// gtp command must end with "\n"
+	if !strings.HasSuffix(command, "\n") {
+		command = command + "\n"
+	}
 	_, err := io.WriteString(katagoRunner.commandWriter, command)
 	if err != nil {
 		return err

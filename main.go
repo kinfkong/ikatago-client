@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/jessevdk/go-flags"
 	"github.com/kinfkong/ikatago-client/client"
@@ -50,7 +51,7 @@ func (callback *MockDataCallback) OnReady() {
 }
 
 func TestSDK() {
-	client, _ := ikatagosdk.NewClient("", "all", "zz-xxx", "xxxx")
+	client, _ := ikatagosdk.NewClient("", "all", "zz-xxxx", "xxxx")
 	client.SetExtraArgs("--gpu-type 6x --kata-weight 60b")
 	// query server
 	result, _ := client.QueryServer()
@@ -58,14 +59,15 @@ func TestSDK() {
 	// run katago
 	runner, _ := client.CreateKatagoRunner()
 	var callback ikatagosdk.DataCallback = &MockDataCallback{}
-
+	go func() {
+		time.Sleep(time.Second * 15)
+		runner.SendGTPCommand("version\n")
+	}()
 	runner.Run(callback)
 
 }
 
 func main() {
-	/*TestSDK()
-	return*/
 	l := log.New(os.Stderr, "", 0)
 	fmt.Fprintln(os.Stderr, "ikatago version: ", AppVersion)
 	// parse args
