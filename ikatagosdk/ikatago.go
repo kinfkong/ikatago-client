@@ -8,6 +8,7 @@ import (
 
 	"github.com/jessevdk/go-flags"
 	"github.com/kinfkong/ikatago-client/client"
+	"github.com/kinfkong/ikatago-client/model"
 	"github.com/kinfkong/ikatago-client/utils"
 )
 
@@ -72,6 +73,60 @@ func (notifier *dataNotifier) Write(p []byte) (n int, err error) {
 		notifier.callback(p)
 	}
 	return len(p), nil
+}
+
+func NewClientRunnerFromArgs(argString string) (*Client, *KatagoRunner, error) {
+	opts := model.AllOpts{}
+	subCommands, err := flags.ParseArgs(&opts, strings.Split(argString, " "))
+	if err != nil {
+		return nil, nil, err
+	}
+	world := "all"
+	if opts.World != nil {
+		world = *opts.World
+	}
+	client, err := NewClient(world, opts.Platform, opts.Username, opts.Password)
+	if err != nil {
+		return nil, nil, err
+	}
+	if opts.EngineType != nil {
+		client.SetEngineType(*opts.EngineType)
+	}
+	if opts.GpuType != nil {
+		client.SetGpuType(*opts.GpuType)
+	}
+	if opts.ForceNode != nil {
+		client.SetForceNode(*opts.ForceNode)
+	}
+	if opts.Token != nil {
+		client.SetToken(*opts.Token)
+	}
+	runner, err := client.CreateKatagoRunner()
+	if err != nil {
+		return nil, nil, err
+	}
+	if len(subCommands) > 0 {
+		runner.SetSubCommands(strings.Join(subCommands, " "))
+	}
+	if opts.KataWeight != nil {
+		runner.SetKataWeight(*opts.KataWeight)
+	}
+	if opts.KataConfig != nil {
+		runner.SetKataConfig(*opts.KataConfig)
+	}
+	if opts.KataName != nil {
+		runner.SetKataName(*opts.KataName)
+	}
+	if opts.KataOverrideConfig != nil {
+		runner.SetKataOverrideConfig(*opts.KataOverrideConfig)
+	}
+	runner.DisableCompress(opts.NoCompress)
+	runner.SetRefreshInterval(opts.RefreshInterval)
+	runner.SetTransmitMoveNum(opts.TransmitMoveNum)
+	if opts.KataLocalConfig != nil {
+		runner.SetKataLocalConfig(*opts.KataLocalConfig)
+	}
+	return client, runner, nil
 }
 
 // NewClient creates the new mobile client
