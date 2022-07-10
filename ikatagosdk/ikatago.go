@@ -81,7 +81,7 @@ func NewClientRunnerFromArgs(argString string) (*Client, *KatagoRunner, error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	world := "all"
+	world := ""
 	if opts.World != nil {
 		world = *opts.World
 	}
