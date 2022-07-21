@@ -104,6 +104,38 @@ func (client *Client) RunKatago(options RunKatagoOptions, subCommands []string, 
 	return &result, nil
 }
 
+// PreloadKatago runs the katago
+func (client *Client) PreloadKatago(options RunKatagoOptions, subCommands []string, inputReader io.Reader, outputWriter io.Writer, stderrWriter io.Writer, onReady func()) (*SessionResult, error) {
+	if !client.init {
+		err := client.initClient()
+		if err != nil {
+			return nil, err
+		}
+	}
+	if options.KataLocalConfig != nil {
+		// run scp to copy the configure
+		err := (&katassh.KataSSHSession{}).RunSCP(client.sshOptions, *options.KataLocalConfig, client.BuildServerLocationOptions())
+		if err != nil {
+			return nil, err
+		}
+	}
+	s := &katassh.KataSSHSession{}
+	result := SessionResult{
+		session: s,
+	}
+	// build the ssh command
+	result.wg.Add(1)
+	go func() {
+		err := s.RunKatago(client.sshOptions, client.BuildKatagoCommand("preload-katago", options, subCommands), inputReader, outputWriter, stderrWriter, options.UseRawData, onReady)
+		if err != nil {
+			result.Err = err
+		}
+		result.wg.Done()
+	}()
+
+	return &result, nil
+}
+
 // ViewConfig views the katago config
 func (client *Client) ViewConfig(options RunKatagoOptions, subCommands []string, outputWriter io.Writer) error {
 	if !client.init {

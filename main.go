@@ -93,6 +93,23 @@ func main() {
 			log.Fatal("Failed to run katago.", err)
 		}
 		sessionResult.Wait()
+	} else if opts.Command == "preload-katago" {
+		sessionResult, err := remoteClient.PreloadKatago(client.RunKatagoOptions{
+			NoCompress:         opts.NoCompress,
+			RefreshInterval:    opts.RefreshInterval,
+			TransmitMoveNum:    opts.TransmitMoveNum,
+			KataLocalConfig:    opts.KataLocalConfig,
+			KataOverrideConfig: opts.KataOverrideConfig,
+			KataConfig:         opts.KataConfig,
+			KataWeight:         opts.KataWeight,
+			KataName:           opts.KataName,
+			UseRawData:         false,
+		}, subCommands, os.Stdin, os.Stdout, os.Stderr, nil)
+		if err != nil {
+			log.Printf("ERROR preload katago failed: %v", err)
+			log.Fatal("Failed to preload katago.", err)
+		}
+		sessionResult.Wait()
 	} else if opts.Command == "query-server" {
 		// run katago command
 		err := remoteClient.QueryServer(os.Stdout)
