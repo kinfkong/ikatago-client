@@ -50,7 +50,7 @@ func (kataSSHSession *KataSSHSession) RunSSH(sshoptions model.SSHOptions, cmd st
 	session.Stdin = stdinReader
 	session.Stdout = outputWriter
 
-	log.Printf("DEBUG running equal commad: ssh -p %d %s@%s %s\n", sshoptions.Port, sshoptions.User, sshoptions.Host, cmd)
+	//log.Printf("DEBUG running equal commad: ssh -p %d %s@%s %s\n", sshoptions.Port, sshoptions.User, sshoptions.Host, cmd)
 
 	err = session.Run(cmd)
 	if err != nil {
@@ -208,7 +208,7 @@ func (kataSSHSession *KataSSHSession) RunKatago(sshoptions model.SSHOptions, cmd
 		}
 	}()
 
-	log.Printf("DEBUG running equal commad: ssh -p %d %s@%s %s\n", sshoptions.Port, sshoptions.User, sshoptions.Host, cmd)
+	//log.Printf("DEBUG running equal commad: ssh -p %d %s@%s %s\n", sshoptions.Port, sshoptions.User, sshoptions.Host, cmd)
 	if onReady != nil {
 		onReady()
 	}

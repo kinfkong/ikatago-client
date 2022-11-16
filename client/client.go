@@ -26,6 +26,7 @@ type Options struct {
 	ForceNode  *string `json:"forceNode"`
 	GpuType    *string `json:"gpuType"`
 	Token      *string `json:"token"`
+	ExtraInfo  *string `json:"extraInfo"`
 }
 
 // RunKatagoOptions represents the run katago options
@@ -38,6 +39,7 @@ type RunKatagoOptions struct {
 	KataWeight         *string
 	KataConfig         *string
 	KataOverrideConfig *string
+	ExtraInfo          *string
 	UseRawData         bool
 }
 
@@ -206,6 +208,7 @@ func (client *Client) BuildKatagoCommand(cmd string, options RunKatagoOptions, s
 	kataConfig := options.KataConfig
 	kataLocalConfig := options.KataLocalConfig
 	kataOverrideConfig := options.KataOverrideConfig
+	extraInfo := options.ExtraInfo
 	if kataName != nil && len(*kataName) > 0 {
 		cmd = cmd + fmt.Sprintf(" --name %s", *kataName)
 	}
@@ -217,6 +220,9 @@ func (client *Client) BuildKatagoCommand(cmd string, options RunKatagoOptions, s
 	}
 	if kataLocalConfig != nil && len(*kataLocalConfig) > 0 {
 		cmd = cmd + fmt.Sprintf(" --custom-config %s", filepath.Base(*kataLocalConfig))
+	}
+	if extraInfo != nil && len(*extraInfo) > 0 {
+		cmd = cmd + fmt.Sprintf(" --extra-info %s", *extraInfo)
 	}
 
 	if !options.NoCompress {

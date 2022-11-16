@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	AppVersion = "1.6.1"
+	AppVersion = "1.7.1"
 )
 
 var opts = model.AllOpts{}
@@ -86,6 +86,7 @@ func main() {
 			KataConfig:         opts.KataConfig,
 			KataWeight:         opts.KataWeight,
 			KataName:           opts.KataName,
+			ExtraInfo:          opts.ExtraInfo,
 			UseRawData:         false,
 		}, subCommands, os.Stdin, os.Stdout, os.Stderr, nil)
 		if err != nil {

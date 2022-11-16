@@ -26,5 +26,6 @@ type AllOpts struct {
 	ForceNode  *string `long:"force-node" description:"in cluster, force to a specific node."`
 	KataWeight *string `long:"kata-weight" description:"The katago weight name"`
 	KataConfig *string `long:"kata-config" description:"The katago config name"`
+	ExtraInfo  *string `long:"extra-info" description:"The extra info"`
 	Command    string  `long:"cmd" description:"The command to run the katago" default:"run-katago"`
 }

@@ -25,6 +25,7 @@ type genericOptions struct {
 	ForceNode          *string `long:"force-node" description:"in cluster, force to a specific node."`
 	Token              *string `long:"token" description:"sets the token"`
 	GpuType            *string `long:"gpu-type" description:"sets the gpu type"`
+	ExtraInfo          *string `long:"extra-info" description:"sets the extra info of the command"`
 }
 
 // Client the client wrapper
@@ -59,6 +60,7 @@ type KatagoRunner struct {
 	kataName           *string
 	kataWeight         *string
 	kataConfig         *string
+	extraInfo          *string
 	subCommands        []string
 	reader             io.Reader
 	writer             io.Writer
@@ -68,6 +70,11 @@ type KatagoRunner struct {
 	started            bool
 }
 
+type ClientRunner struct {
+	Client *Client
+	Runner *KatagoRunner
+}
+
 func (notifier *dataNotifier) Write(p []byte) (n int, err error) {
 	if notifier.callback != nil {
 		notifier.callback(p)
@@ -75,11 +82,11 @@ func (notifier *dataNotifier) Write(p []byte) (n int, err error) {
 	return len(p), nil
 }
 
-func NewClientRunnerFromArgs(argString string) (*Client, *KatagoRunner, error) {
+func NewClientRunnerFromArgs(argString string) (*ClientRunner, error) {
 	opts := model.AllOpts{}
 	subCommands, err := flags.ParseArgs(&opts, strings.Split(argString, " "))
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	world := ""
 	if opts.World != nil {
@@ -87,7 +94,7 @@ func NewClientRunnerFromArgs(argString string) (*Client, *KatagoRunner, error) {
 	}
 	client, err := NewClient(world, opts.Platform, opts.Username, opts.Password)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	if opts.EngineType != nil {
 		client.SetEngineType(*opts.EngineType)
@@ -103,7 +110,7 @@ func NewClientRunnerFromArgs(argString string) (*Client, *KatagoRunner, error) {
 	}
 	runner, err := client.CreateKatagoRunner()
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	if len(subCommands) > 0 {
 		runner.SetSubCommands(strings.Join(subCommands, " "))
@@ -120,13 +127,16 @@ func NewClientRunnerFromArgs(argString string) (*Client, *KatagoRunner, error) {
 	if opts.KataOverrideConfig != nil {
 		runner.SetKataOverrideConfig(*opts.KataOverrideConfig)
 	}
+	if opts.ExtraInfo != nil {
+		runner.SetExtraInfo(*opts.ExtraInfo)
+	}
 	runner.DisableCompress(opts.NoCompress)
 	runner.SetRefreshInterval(opts.RefreshInterval)
 	runner.SetTransmitMoveNum(opts.TransmitMoveNum)
 	if opts.KataLocalConfig != nil {
 		runner.SetKataLocalConfig(*opts.KataLocalConfig)
 	}
-	return client, runner, nil
+	return &ClientRunner{Client: client, Runner: runner}, nil
 }
 
 // NewClient creates the new mobile client
@@ -243,6 +253,9 @@ func (client *Client) CreateKatagoRunner() (*KatagoRunner, error) {
 			if opts.KataLocalConfig != nil {
 				runner.SetKataLocalConfig(*opts.KataLocalConfig)
 			}
+			if opts.ExtraInfo != nil {
+				runner.SetExtraInfo(*opts.ExtraInfo)
+			}
 		}
 
 	}
@@ -262,6 +275,7 @@ func (katagoRunner *KatagoRunner) Run(callback DataCallback) error {
 		KataWeight:         katagoRunner.kataWeight,
 		KataConfig:         katagoRunner.kataConfig,
 		UseRawData:         katagoRunner.useRawData,
+		ExtraInfo:          katagoRunner.extraInfo,
 	}
 	katagoRunner.writer = &dataNotifier{
 		callback: callback.Callback,
@@ -324,6 +338,11 @@ func (katagoRunner *KatagoRunner) SetRefreshInterval(refreshInterval int) {
 // SetTransmitMoveNum sets the transmit move num
 func (katagoRunner *KatagoRunner) SetTransmitMoveNum(transmitMoveNum int) {
 	katagoRunner.transmitMoveNum = transmitMoveNum
+}
+
+// SetExtraInfo sets the extra info
+func (katagoRunner *KatagoRunner) SetExtraInfo(extraInfo string) {
+	katagoRunner.extraInfo = &extraInfo
 }
 
 // SendGTPCommand sends the gtp command
