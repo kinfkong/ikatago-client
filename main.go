@@ -90,8 +90,8 @@ func main() {
 			UseRawData:         false,
 		}, subCommands, os.Stdin, os.Stdout, os.Stderr, nil)
 		if err != nil {
-			log.Printf("ERROR run katago failed: %v", err)
-			log.Fatal("Failed to run katago.", err)
+			l.Printf("ERROR run katago failed: %v", err)
+			l.Fatal("Failed to run katago.", err)
 		}
 		sessionResult.Wait()
 	} else if opts.Command == "preload-katago" {
@@ -107,15 +107,15 @@ func main() {
 			UseRawData:         false,
 		}, subCommands, os.Stdin, os.Stdout, os.Stderr, nil)
 		if err != nil {
-			log.Printf("ERROR preload katago failed: %v", err)
-			log.Fatal("Failed to preload katago.", err)
+			l.Printf("ERROR preload katago failed: %v", err)
+			l.Fatal("Failed to preload katago.", err)
 		}
 		sessionResult.Wait()
 	} else if opts.Command == "query-server" {
 		// run katago command
 		err := remoteClient.QueryServer(os.Stdout)
 		if err != nil {
-			log.Fatal("Failed to query server.", err)
+			l.Fatal("Failed to query server.", err)
 		}
 	} else if opts.Command == "view-config" {
 		err := remoteClient.ViewConfig(client.RunKatagoOptions{
@@ -130,10 +130,10 @@ func main() {
 			UseRawData:         false,
 		}, subCommands, os.Stdout)
 		if err != nil {
-			log.Printf("ERROR view katago config failed: %v", err)
-			log.Fatal("Failed to view katago config.", err)
+			l.Printf("ERROR view katago config failed: %v", err)
+			l.Fatal("Failed to view katago config.", err)
 		}
 	} else {
-		log.Fatal(fmt.Sprintf("Unknown command: [%s]", opts.Command))
+		l.Fatal(fmt.Sprintf("Unknown command: [%s]", opts.Command))
 	}
 }

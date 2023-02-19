@@ -2,7 +2,9 @@ package ikatagosdk
 
 import (
 	"bytes"
+	"errors"
 	"io"
+	"os"
 	"strings"
 	"time"
 
@@ -26,6 +28,7 @@ type genericOptions struct {
 	Token              *string `long:"token" description:"sets the token"`
 	GpuType            *string `long:"gpu-type" description:"sets the gpu type"`
 	ExtraInfo          *string `long:"extra-info" description:"sets the extra info of the command"`
+	Command            string  `long:"cmd" description:"The command to run the katago" default:"run-katago"`
 }
 
 // Client the client wrapper
@@ -178,6 +181,7 @@ func (client *Client) SetExtraArgs(extraArgs string) {
 	if opts.Token != nil {
 		client.SetToken(*opts.Token)
 	}
+
 	client.extraArgs = &extraArgs
 }
 
@@ -297,6 +301,49 @@ func (katagoRunner *KatagoRunner) Run(callback DataCallback) error {
 	katagoRunner.sessionResult = sessionResult
 	sessionResult.Wait()
 	katagoRunner.started = false
+	return nil
+}
+
+func (katagoRunner *KatagoRunner) RunWithStdio(command string) error {
+	remoteClient := katagoRunner.client.remoteClient
+	options := client.RunKatagoOptions{
+		NoCompress:         katagoRunner.noCompress,
+		RefreshInterval:    katagoRunner.refreshInterval,
+		TransmitMoveNum:    katagoRunner.transmitMoveNum,
+		KataLocalConfig:    katagoRunner.kataLocalConfig,
+		KataOverrideConfig: katagoRunner.kataOverrideConfig,
+		KataName:           katagoRunner.kataName,
+		KataWeight:         katagoRunner.kataWeight,
+		KataConfig:         katagoRunner.kataConfig,
+		UseRawData:         katagoRunner.useRawData,
+		ExtraInfo:          katagoRunner.extraInfo,
+	}
+	if command == "run-katago" {
+		sessionResult, err := remoteClient.RunKatago(options, katagoRunner.subCommands, os.Stdin, os.Stdout, os.Stderr, nil)
+		if err != nil {
+			return err
+		}
+		sessionResult.Wait()
+	} else if command == "preload-katago" {
+		sessionResult, err := remoteClient.PreloadKatago(options, katagoRunner.subCommands, os.Stdin, os.Stdout, os.Stderr, nil)
+		if err != nil {
+			return err
+		}
+		sessionResult.Wait()
+	} else if command == "query-server" {
+		// run katago command
+		err := remoteClient.QueryServer(os.Stdout)
+		if err != nil {
+			return err
+		}
+	} else if command == "view-config" {
+		err := remoteClient.ViewConfig(options, katagoRunner.subCommands, os.Stdout)
+		if err != nil {
+			return err
+		}
+	} else {
+		return errors.New("unknown command")
+	}
 	return nil
 }
 
