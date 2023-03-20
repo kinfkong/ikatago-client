@@ -3,9 +3,9 @@ module github.com/kinfkong/ikatago-client
 go 1.14
 
 require (
-	github.com/bramvdbogaerde/go-scp v0.0.0-20200518191442-5c8efdd1d925
 	github.com/jessevdk/go-flags v1.4.0
+	github.com/smartystreets/goconvey v1.7.2 // indirect
 	golang.org/x/crypto v0.0.0-20200728195943-123391ffb6de
-	golang.org/x/mobile v0.0.0-20210701032007-93619952ba7f // indirect
+	golang.org/x/sys v0.0.0-20210510120138-977fb7262007 // indirect
 	moul.io/http2curl v1.0.0
 )
