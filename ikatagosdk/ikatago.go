@@ -326,6 +326,7 @@ func (katagoRunner *KatagoRunner) RunWithStdio(command string) error {
 		KataConfig:         katagoRunner.kataConfig,
 		UseRawData:         katagoRunner.useRawData,
 		ExtraInfo:          katagoRunner.extraInfo,
+		ClientID:           katagoRunner.clientID,
 	}
 	if command == "run-katago" {
 		sessionResult, err := remoteClient.RunKatago(options, katagoRunner.subCommands, os.Stdin, os.Stdout, os.Stderr, nil)
