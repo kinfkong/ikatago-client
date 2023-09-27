@@ -135,6 +135,9 @@ func NewClientRunnerFromArgs(argString string) (*ClientRunner, error) {
 	if opts.ExtraInfo != nil {
 		runner.SetExtraInfo(*opts.ExtraInfo)
 	}
+	if opts.ClientID != nil {
+		runner.SetClientID(*opts.ClientID)
+	}
 	runner.DisableCompress(opts.NoCompress)
 	runner.SetRefreshInterval(opts.RefreshInterval)
 	runner.SetTransmitMoveNum(opts.TransmitMoveNum)
