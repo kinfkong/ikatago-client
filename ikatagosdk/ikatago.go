@@ -28,6 +28,7 @@ type genericOptions struct {
 	Token              *string `long:"token" description:"sets the token"`
 	GpuType            *string `long:"gpu-type" description:"sets the gpu type"`
 	ExtraInfo          *string `long:"extra-info" description:"sets the extra info of the command"`
+	ClientID           *string `long:"client-id" description:"sets the client id"`
 	Command            string  `long:"cmd" description:"The command to run the katago" default:"run-katago"`
 }
 
@@ -64,6 +65,7 @@ type KatagoRunner struct {
 	kataWeight         *string
 	kataConfig         *string
 	extraInfo          *string
+	clientID           *string
 	subCommands        []string
 	reader             io.Reader
 	writer             io.Writer
@@ -260,6 +262,9 @@ func (client *Client) CreateKatagoRunner() (*KatagoRunner, error) {
 			if opts.ExtraInfo != nil {
 				runner.SetExtraInfo(*opts.ExtraInfo)
 			}
+			if opts.ClientID != nil {
+				runner.SetClientID(*opts.ClientID)
+			}
 		}
 
 	}
@@ -280,6 +285,7 @@ func (katagoRunner *KatagoRunner) Run(callback DataCallback) error {
 		KataConfig:         katagoRunner.kataConfig,
 		UseRawData:         katagoRunner.useRawData,
 		ExtraInfo:          katagoRunner.extraInfo,
+		ClientID:           katagoRunner.clientID,
 	}
 	katagoRunner.writer = &dataNotifier{
 		callback: callback.Callback,
@@ -390,6 +396,11 @@ func (katagoRunner *KatagoRunner) SetTransmitMoveNum(transmitMoveNum int) {
 // SetExtraInfo sets the extra info
 func (katagoRunner *KatagoRunner) SetExtraInfo(extraInfo string) {
 	katagoRunner.extraInfo = &extraInfo
+}
+
+// SetClientID sets the client id
+func (katagoRunner *KatagoRunner) SetClientID(clientID string) {
+	katagoRunner.clientID = &clientID
 }
 
 // SendGTPCommand sends the gtp command

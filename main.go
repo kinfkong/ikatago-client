@@ -87,6 +87,7 @@ func main() {
 			KataWeight:         opts.KataWeight,
 			KataName:           opts.KataName,
 			ExtraInfo:          opts.ExtraInfo,
+			ClientID:           opts.ClientID,
 			UseRawData:         false,
 		}, subCommands, os.Stdin, os.Stdout, os.Stderr, nil)
 		if err != nil {

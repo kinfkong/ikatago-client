@@ -41,6 +41,7 @@ type RunKatagoOptions struct {
 	KataOverrideConfig *string
 	ExtraInfo          *string
 	UseRawData         bool
+	ClientID           *string
 }
 
 // Client represents the ikatago client
@@ -209,6 +210,7 @@ func (client *Client) BuildKatagoCommand(cmd string, options RunKatagoOptions, s
 	kataLocalConfig := options.KataLocalConfig
 	kataOverrideConfig := options.KataOverrideConfig
 	extraInfo := options.ExtraInfo
+	clientID := options.ClientID
 	if kataName != nil && len(*kataName) > 0 {
 		cmd = cmd + fmt.Sprintf(" --name %s", *kataName)
 	}
@@ -224,7 +226,9 @@ func (client *Client) BuildKatagoCommand(cmd string, options RunKatagoOptions, s
 	if extraInfo != nil && len(*extraInfo) > 0 {
 		cmd = cmd + fmt.Sprintf(" --extra-info %s", *extraInfo)
 	}
-
+	if clientID != nil && len(*clientID) > 0 {
+		cmd = cmd + fmt.Sprintf(" --client-id %s", *clientID)
+	}
 	if !options.NoCompress {
 		cmd = cmd + " --compress"
 	}

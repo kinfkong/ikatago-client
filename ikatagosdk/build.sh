@@ -1,4 +1,5 @@
 #!/bin/bash
+gomobile init
 gomobile bind --target=ios -o ../../ikatago-ios-sdk/ikatagosdk.framework .
 rm -rf ~/gochess/react-native-ikatago-sdk/ios/ikatagosdk.framework
 gcp -RP ../../ikatago-ios-sdk/ikatagosdk.framework ~/gochess/react-native-ikatago-sdk/ios
