@@ -208,6 +208,21 @@ func (kataSSHSession *KataSSHSession) RunKatago(sshoptions model.SSHOptions, cmd
 		}
 	}()
 
+	// keep alive
+	go func() {
+		for {
+			if kataSSHSession.Stopped {
+				break
+			}
+			_, err := session.SendRequest("keepalive@ikatago.com", true, nil)
+			if err != nil {
+				log.Printf("DEBUG keep alive failed: %v", err)
+				break
+			}
+			time.Sleep(15 * time.Second)
+		}
+	}()
+
 	//log.Printf("DEBUG running equal commad: ssh -p %d %s@%s %s\n", sshoptions.Port, sshoptions.User, sshoptions.Host, cmd)
 	if onReady != nil {
 		onReady()
