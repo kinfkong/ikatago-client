@@ -216,7 +216,6 @@ func (kataSSHSession *KataSSHSession) RunKatago(sshoptions model.SSHOptions, cmd
 			}
 			_, err := session.SendRequest("keepalive@ikatago.com", true, nil)
 			if err != nil {
-				log.Printf("DEBUG keep alive failed: %v", err)
 				break
 			}
 			time.Sleep(15 * time.Second)
