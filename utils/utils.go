@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"os"
 
-	"moul.io/http2curl"
+	"moul.io/http2curl/v2"
 )
 
 // DoHTTPRequest Sends generic http request
